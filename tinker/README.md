@@ -1,4 +1,4 @@
-# debug-shell
+# tinker
 
 * Debian GNU/Linux 10 (buster)
 * `zsh` zsh 5.7.1 (x86_64-debian-linux-gnu)

@@ -1,16 +1,11 @@
-FROM bitnami/minideb:latest as hg
+FROM mpen/build-essentials as hg
 
-WORKDIR /tmp/hg
-ENV PYTHON=python3
-RUN install_packages curl ca-certificates build-essential python3 python3-distutils python3-dev \
-    && curl -sL 'https://www.mercurial-scm.org/release/mercurial-5.4.1.tar.gz' | tar xz --strip=1 \
-    && make build
+WORKDIR /work
+RUN curl -sL 'https://www.mercurial-scm.org/release/mercurial-5.4.2.tar.gz' | tar xz --strip=1 && make build
 
 ###
 
 FROM mpen/zsh
-
-ENV PYTHON=python3
 
 RUN . /etc/os-release \
     && install_packages curl ca-certificates software-properties-common dirmngr gnupg xz-utils nano less zip unzip python3 python3-distutils build-essential python3-dev htop rsync ncdu pydf \
@@ -34,26 +29,27 @@ RUN . /etc/os-release \
     && curl -sL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py -o /usr/local/bin/speedtest \
     && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest
 
-COPY --from=hg /tmp/hg /tmp/hg
-RUN cd /tmp/hg && make PREFIX=/usr install-bin && rm -r /tmp/hg
+COPY --from=mpen/mercurial /work /tmp/hg
+RUN cd /tmp/hg && make PREFIX=/usr install && rm -r /tmp/hg
 
-RUN . /etc/os-release && echo "$PRETTY_NAME" \
-    && echo '[zsh]' $(zsh --version | head -n1) \
-    && echo '[node]' $(node --version | head -n1) \
-    && echo '[npm]' $(npm --version | head -n1) \
-    && echo '[yarn]' $(yarn --version | head -n1) \
-    && echo '[php]' $(php --version | head -n1) \
-    && echo '[composer]' $(composer --version | head -n1) \
-    && echo '[psysh]' $(psysh --version | head -n1) \
-    && echo '[rclone]' $(rclone --version | head -n1) \
-    && echo '[mariadb]' $(mariadb --version | head -n1) \
-    && echo '[git]' $(git --version | head -n1) \
-    && echo '[hg]' $(hg --version | head -n1) \
-    && echo '[python]' $(python --version | head -n1) \
-    && echo '[pip]' $(pip --version | head -n1) \
-    && echo '[htop]' $(htop --version | head -n1) \
-    && echo '[jq]' $(jq --version | head -n1) \
-    && echo '[rsync]' $(rsync --version | head -n1) \
-    && echo '[speedtest]' $(speedtest --version | head -n1) \
-    && echo '[ncdu]' $(ncdu -v | head -n1) \
-    && echo '[pydf]' $(pydf --version | head -n1)
+COPY .zlogin /root/.zlogin
+#RUN . /etc/os-release && echo "$PRETTY_NAME" \
+#    && echo '[zsh]' $(zsh --version | head -n1) \
+#    && echo '[node]' $(node --version | head -n1) \
+#    && echo '[npm]' $(npm --version | head -n1) \
+#    && echo '[yarn]' $(yarn --version | head -n1) \
+#    && echo '[php]' $(php --version | head -n1) \
+#    && echo '[composer]' $(composer --version | head -n1) \
+#    && echo '[psysh]' $(psysh --version | head -n1) \
+#    && echo '[rclone]' $(rclone --version | head -n1) \
+#    && echo '[mariadb]' $(mariadb --version | head -n1) \
+#    && echo '[git]' $(git --version | head -n1) \
+#    && echo '[hg]' $(hg --version | head -n1) \
+#    && echo '[python]' $(python --version | head -n1) \
+#    && echo '[pip]' $(pip --version | head -n1) \
+#    && echo '[htop]' $(htop --version | head -n1) \
+#    && echo '[jq]' $(jq --version | head -n1) \
+#    && echo '[rsync]' $(rsync --version | head -n1) \
+#    && echo '[speedtest]' $(speedtest --version | head -n1) \
+#    && echo '[ncdu]' $(ncdu -v | head -n1) \
+#    && echo '[pydf]' $(pydf --version | head -n1)
