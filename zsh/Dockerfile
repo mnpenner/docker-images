@@ -26,4 +26,4 @@ COPY --from=zinit /work/zinit .zinit/bin
 ENV TERM=xterm-256color
 RUN source .zshrc
 
-CMD ["zsh", "-l"]
+CMD ["zsh", "-il"]
