@@ -1,5 +1,7 @@
 alias ls='\ls --color=auto'
 alias ll='ls -lAhtrF'
+alias grep='\grep --color=auto --perl-regexp'
+alias grepr='grep --dereference-recursive'
 
 dcp() {
   # print a command to copy files out of this docker container
