@@ -8,7 +8,7 @@ RUN curl -sL 'https://www.mercurial-scm.org/release/mercurial-5.4.2.tar.gz' | ta
 FROM mpen/zsh
 
 RUN . /etc/os-release \
-    && install_packages curl ca-certificates software-properties-common dirmngr gnupg xz-utils nano less zip unzip python3 python3-distutils build-essential python3-dev htop rsync ncdu pydf \
+    && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf sendmail \
     && curl -sL 'https://deb.nodesource.com/setup_14.x' | bash - \
     && apt-key adv --fetch-keys \
         'https://dl.yarnpkg.com/debian/pubkey.gpg' \
