@@ -62,29 +62,19 @@ RUN install_packages libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev \
         --add-module=$BUILD_DIR/headers-more \
         --add-module=$BUILD_DIR/brotli \
     && make && make install \
-    && rm -r "$BUILD_DIR" /etc/nginx/*.default \
-    && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
-
+    && rm -r "$BUILD_DIR" /etc/nginx/html /etc/nginx/*.default /etc/nginx/koi-* /etc/nginx/win-utf \
+    && ln -sfn /dev/stdout /var/log/nginx/access.log \
+    && ln -sfn /dev/stderr /var/log/nginx/error.log
 
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY conf.d /etc/nginx/conf.d
-COPY html /etc/nginx/html
+COPY www /srv/www
 
-RUN chown -R nginx:nginx /etc/nginx && chmod -R a-xst,ug+rwX,o=rX /etc/nginx
+RUN chown -R nginx:nginx /etc/nginx /srv/www /var/log/nginx \
+    && chmod -R a-xst,ug+rwX,o=rX /etc/nginx /srv/www /var/log/nginx
+
 WORKDIR /etc/nginx
 
-# TODO: add to path...?
 CMD ["nginx", "-g", "daemon off;"]
-#RUN git clone https://github.com/google/ngx_brotli.git . \
-#    && ./configure \
-#    && make modules
-#
-#FROM bitnami/nginx
-#
-#USER 0
-#RUN install_packages nginx-plus-module-brotli
-#USER 1001
 
-#COPY brotli.conf /opt/bitnami/nginx/conf/server_blocks/brotli.conf
