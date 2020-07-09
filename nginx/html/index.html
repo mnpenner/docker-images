@@ -1,0 +1,25 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Nginx</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="content">
+        <h1>Welcome to NginX</h1>
+
+        <p>If you see this page, the nginx web server is successfully installed and working.<br>
+            Further configuration is required.</p>
+
+        <p>Overwrite this default <a href="https://www.nginx.com/resources/wiki/start/topics/examples/server_blocks/" target="_blank" rel="noopener noreferrer">server block</a> via the <a href="https://docs.docker.com/engine/reference/builder/" target="_blank" rel="noopener noreferrer"><code>Dockerfile</code></a> instructions:</p>
+
+        <pre>
+            RUN rm -r /etc/nginx/html
+            COPY --chown=nginx:nginx your_server.conf /etc/nginx/conf.d/default.conf
+        </pre>
+    </div>
+</body>
+</html>

@@ -1,5 +1,18 @@
-# Nginx
+# NginX
 
-- Nginx 1.19.0
+- nginx 1.19.1
 - ngx_headers_more v0.33
 - ngx_brotli
+
+
+## Compare defaults
+
+```shell script
+docker run --rm nginx cat /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+docker run --rm bitnami/nginx cat /opt/bitnami/nginx/conf/nginx.conf
+docker run --rm mpen/nginx cat /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+docker run --rm nginx nginx -V
+docker run --rm bitnami/nginx nginx -V
+docker run --rm mpen/nginx nginx -V
+```
