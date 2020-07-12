@@ -1,0 +1,8 @@
+
+
+test: build
+	docker run --rm -it mpen/mariadb-client
+
+build:
+	docker build . -t mpen/mariadb-client:10.4 --build-arg MARIADB_VERSION=10.4
+	docker build . -t mpen/mariadb-client:latest -t mpen/mariadb-client:10.5 --build-arg MARIADB_VERSION=10.5
