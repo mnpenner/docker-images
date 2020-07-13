@@ -1,5 +1,5 @@
 FROM mpen/build-essentials
-ARG MARIADB_VERSION=10.4
+ARG MARIADB_VERSION=10.5
 
 RUN apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc' \
     && . /etc/os-release \

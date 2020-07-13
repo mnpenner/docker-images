@@ -6,3 +6,4 @@ test: build
 
 build:
 	docker build . -t mpen/tinker
+	docker push mpen/tinker
