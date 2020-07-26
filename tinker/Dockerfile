@@ -1,25 +1,30 @@
 FROM mpen/build-essentials as hg
+ARG HG_VER=5.4.2
 
 WORKDIR /work
-RUN curl -sL 'https://www.mercurial-scm.org/release/mercurial-5.4.2.tar.gz' | tar xz --strip=1 && make build
+RUN curl -sL "https://www.mercurial-scm.org/release/mercurial-$HG_VER.tar.gz" | tar xz --strip=1 && make build
 
 ###
 
 FROM mpen/zsh
+ARG RIPGREP_VER=12.1.1
+ARG MARIADB_VER=10.5
+ARG PHP_VER=7.4
+ARG NODE_VER=14.x
 
 RUN . /etc/os-release \
-    && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils ripgrep \
-    && curl -sL 'https://deb.nodesource.com/setup_14.x' | bash - \
+    && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils \
+    && curl -sL "https://deb.nodesource.com/setup_$NODE_VER" | bash - \
     && apt-key adv --fetch-keys \
         'https://dl.yarnpkg.com/debian/pubkey.gpg' \
         'https://packages.sury.org/php/apt.gpg' \
         'https://mariadb.org/mariadb_release_signing_key.asc' \
     && add-apt-repository "deb https://dl.yarnpkg.com/debian/ stable main" \
-    && add-apt-repository "deb https://packages.sury.org/php/ $(lsb_release -sc) main" \
-    && add-apt-repository "deb [arch=amd64] http://sgp1.mirrors.digitalocean.com/mariadb/repo/10.4/$ID $VERSION_CODENAME main" \
+    && add-apt-repository "deb https://packages.sury.org/php/ $VERSION_CODENAME main" \
+    && add-apt-repository "deb [arch=amd64] http://sgp1.mirrors.digitalocean.com/mariadb/repo/$MARIADB_VER/$ID $VERSION_CODENAME main" \
     && install_packages nodejs yarn \
         mariadb-client \
-        php7.4-cli php7.4-mbstring php7.4-curl php7.4-gd php7.4-zip php7.4-xml php7.4-apcu php7.4-bcmath \
+        php${PHP_VER}-cli php${PHP_VER}-mbstring php${PHP_VER}-curl php${PHP_VER}-gd php${PHP_VER}-zip php${PHP_VER}-xml php${PHP_VER}-apcu php${PHP_VER}-bcmath \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
     && curl -sL 'https://getcomposer.org/composer-stable.phar' -o /usr/local/bin/composer \
     && curl -sL 'https://psysh.org/psysh' -o /usr/local/bin/psysh \
@@ -27,7 +32,8 @@ RUN . /etc/os-release \
     && curl -s https://bootstrap.pypa.io/get-pip.py | python \
     && curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq \
     && curl -sL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py -o /usr/local/bin/speedtest \
-    && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest
+    && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest \
+    && RG_DEB="$(mktemp -t rg.XXXXX.deb)" && curl -L "https://github.com/BurntSushi/ripgrep/releases/download/$RIPGREP_VER/ripgrep_${RIPGREP_VER}_amd64.deb" -o "$RG_DEB" && dpkg -i "$RG_DEB" && rm "$RG_DEB"
 
 COPY --from=mpen/mercurial /work /tmp/hg
 RUN cd /tmp/hg && make PREFIX=/usr install && rm -r /tmp/hg
