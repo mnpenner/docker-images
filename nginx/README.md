@@ -16,3 +16,9 @@ docker run --rm nginx nginx -V
 docker run --rm bitnami/nginx nginx -V
 docker run --rm mpen/nginx nginx -V
 ```
+
+## Latest version
+
+```shell script
+hxcopy http://nginx.org/download/ -o . | hxnormalize -x | hxselect -s '\n' -c 'a::attr(href)' | grep '/nginx-1\.\d+\.\d+\.tar\.gz$$' | sort -Vr | head -n1
+```
