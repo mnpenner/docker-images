@@ -25,3 +25,4 @@ sut:
       && command -v pydf
       && command -v hxnormalize
       && command -v hxselect
+      && command -v rg
