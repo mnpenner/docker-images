@@ -10,6 +10,7 @@ dcp() {
   else
     printf "docker exec %q tar czC %q" "$(hostname)" "$PWD"
     if [ "$#" -eq 0 ]; then
+      # FIXME: this will create a "." in the archive; maybe go up one level?
       printf " ."
     else
       printf " %q" "$@"
