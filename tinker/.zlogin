@@ -23,3 +23,4 @@ echo '[pydf]' $(pydf --version | head -n1)
 echo '[pv]' $(pv --version | head -n1)
 echo '[hxselect]' $(hxselect -v | head -n1)
 echo '[rg]' $(rg --version | head -n1)
+echo '[sponge]'

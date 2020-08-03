@@ -26,3 +26,4 @@ sut:
       && command -v hxnormalize
       && command -v hxselect
       && command -v rg
+      && command -v sponge
