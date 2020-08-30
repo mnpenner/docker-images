@@ -1,12 +1,8 @@
-ARG NGINX_VERSION=1.19.1
+FROM mpen/build-essentials as build
+ARG NGINX_VERSION=1.19.2
 ARG HEADERS_MORE_VERSION=0.33
 ARG UID=101
 ARG GID=101
-FROM mpen/build-essentials as build
-ARG NGINX_VERSION
-ARG HEADERS_MORE_VERSION
-ARG UID
-ARG GID
 
 EXPOSE 80
 STOPSIGNAL SIGTERM
@@ -24,8 +20,8 @@ RUN install_packages libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev \
         --sbin-path=/usr/sbin/nginx \
         --modules-path=/usr/lib/nginx/modules \
         --conf-path=/etc/nginx/nginx.conf \
-        --error-log-path=/var/log/nginx/error.log \
-        --http-log-path=/var/log/nginx/access.log \
+        --error-log-path=/dev/stderr \
+        --http-log-path=/dev/stdout \
         --pid-path=/var/run/nginx.pid \
         --lock-path=/var/run/nginx.lock \
         --user=nginx \
@@ -62,19 +58,16 @@ RUN install_packages libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev \
         --add-module=$BUILD_DIR/headers-more \
         --add-module=$BUILD_DIR/brotli \
     && make && make install \
-    && rm -r "$BUILD_DIR" /etc/nginx/html /etc/nginx/*.default /etc/nginx/koi-* /etc/nginx/win-utf \
-    && ln -sfn /dev/stdout /var/log/nginx/access.log \
-    && ln -sfn /dev/stderr /var/log/nginx/error.log
+    && rm -r "$BUILD_DIR" /etc/nginx/html /etc/nginx/*.default /etc/nginx/koi-* /etc/nginx/win-utf
 
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY conf.d /etc/nginx/conf.d
 COPY www /srv/www
 
-RUN chown -R nginx:nginx /etc/nginx /srv/www /var/log/nginx \
-    && chmod -R a-xst,ug+rwX,o=rX /etc/nginx /srv/www /var/log/nginx
+RUN chown -R nginx:nginx /etc/nginx /srv/www \
+    && chmod -R a-sx,ug=rX,o= /etc/nginx /srv/www
 
 WORKDIR /etc/nginx
-
 CMD ["nginx", "-g", "daemon off;"]
 

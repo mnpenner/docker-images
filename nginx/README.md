@@ -1,6 +1,6 @@
 # NginX
 
-- nginx 1.19.1
+- nginx 1.19.2
 - ngx_headers_more v0.33
 - ngx_brotli
 
