@@ -1,11 +1,3 @@
-FROM mpen/build-essentials as hg
-ARG HG_VER=5.4.2
-
-WORKDIR /work
-RUN curl -sL "https://www.mercurial-scm.org/release/mercurial-$HG_VER.tar.gz" | tar xz --strip=1 && make build
-
-###
-
 FROM mpen/zsh
 ARG RIPGREP_VER=12.1.1
 ARG MARIADB_VER=10.5
@@ -30,6 +22,7 @@ RUN . /etc/os-release \
     && curl -sL 'https://psysh.org/psysh' -o /usr/local/bin/psysh \
     && curl -s https://rclone.org/install.sh | bash \
     && curl -s https://bootstrap.pypa.io/get-pip.py | python \
+    && curl -sL https://pnpm.js.org/pnpm.js | node - add --global pnpm \
     && curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq \
     && curl -sL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py -o /usr/local/bin/speedtest \
     && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest \
