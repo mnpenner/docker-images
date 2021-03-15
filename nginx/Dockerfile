@@ -1,5 +1,5 @@
 FROM mpen/build-essentials as build
-ARG NGINX_VERSION=1.19.6
+ARG NGINX_VERSION=1.19.7
 ARG HEADERS_MORE_VERSION=0.33
 ARG UID=101
 ARG GID=101
@@ -61,12 +61,12 @@ RUN install_packages libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev \
     && rm -r "$BUILD_DIR" /etc/nginx/html /etc/nginx/*.default /etc/nginx/koi-* /etc/nginx/win-utf
 
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf mime.types /etc/nginx/
 COPY conf.d /etc/nginx/conf.d
 COPY www /srv/www
 
 RUN chown -R nginx:nginx /etc/nginx /srv/www \
-    && chmod -R a-sx,ug=rX,o= /etc/nginx /srv/www
+    && chmod -R a-x,u-s,ug=rX,g+s,o= /etc/nginx /srv/www
 
 WORKDIR /etc/nginx
 CMD ["nginx", "-g", "daemon off;"]

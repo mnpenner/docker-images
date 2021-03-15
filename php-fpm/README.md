@@ -2,7 +2,7 @@
 
 php-fpm with `composer` and [`php-fpm-healthcheck`](https://github.com/renatomefi/php-fpm-healthcheck).
 
-Uses production configuration by default. `access.log` is disabled to prevent double logging when used with nginx. Runs as `www-data:www-data`.
+Uses production configuration and runs as `www-data:www-data` by default.
 
 Comes with the following extensions enabled:
 

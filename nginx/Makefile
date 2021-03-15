@@ -7,3 +7,6 @@ serve: build
 
 build:
 	docker build . -t mpen/nginx
+
+push: build
+	docker push mpen/nginx

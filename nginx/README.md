@@ -1,6 +1,6 @@
 # NginX
 
-- nginx 1.19.2
+- nginx 1.19.7
 - ngx_headers_more v0.33
 - ngx_brotli
 
@@ -21,4 +21,12 @@ docker run --rm mpen/nginx nginx -V
 
 ```shell script
 hxcopy http://nginx.org/download/ -o . | hxnormalize -x | hxselect -s '\n' -c 'a::attr(href)' | grep '/nginx-1\.\d+\.\d+\.tar\.gz$$' | sort -Vr | head -n1
+```
+
+## Refresh mime.types
+
+```shell
+id=$(docker create mpen/nginx)
+docker cp $id:/etc/nginx/mime.types mime.types
+docker rm -v $id
 ```

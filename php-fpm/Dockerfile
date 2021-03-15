@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y libzip-dev unzip libfcgi-bin \
     && curl -s https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck -o /usr/local/bin/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck \
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
-    && rm "$PHP_INI_DIR/php.ini-development" "$PHP_FPM_DIR/www.conf.default" \
-    && perl -pi -e 's#^(?=access\.log\b)#;#' "$PHP_FPM_DIR/docker.conf"
+    && rm "$PHP_INI_DIR/php.ini-development" "$PHP_FPM_DIR/www.conf.default"
 
+# perl -pi -e 's#^(?=access\.log\b)#;#' "$PHP_FPM_DIR/docker.conf"
 # https://hub.docker.com/_/php
