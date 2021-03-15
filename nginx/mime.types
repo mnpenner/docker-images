@@ -52,6 +52,7 @@ types {
     audio/ogg                                        ogg;
     audio/x-m4a                                      m4a;
     audio/x-realaudio                                ra;
+    font/ttf                                         ttf;
     font/woff                                        woff;
     font/woff2                                       woff2;
     image/gif                                        gif;
