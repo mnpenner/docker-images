@@ -29,3 +29,9 @@ Includes:
     * `vipe` insert a text editor into a pipe
     * `zrun` automatically uncompress arguments to command
 * `pip`
+
+## Compare
+
+```sh
+docker run --rm bitnami/minideb cat /root/.bashrc
+```

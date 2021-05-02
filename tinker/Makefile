@@ -1,9 +1,10 @@
-
-
+NAME := mpen/tinker
 
 test: build
-	docker run --rm -it mpen/tinker
+	docker run --rm -it $(NAME)
 
 build:
-	docker build . -t mpen/tinker
-	docker push mpen/tinker
+	docker build . -t $(NAME)
+
+push: build
+	docker push $(NAME)

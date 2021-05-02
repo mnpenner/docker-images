@@ -24,6 +24,7 @@ RUN . /etc/os-release \
     && curl -s https://bootstrap.pypa.io/get-pip.py | python \
     && curl -sL https://pnpm.js.org/pnpm.js | node - add --global pnpm \
     && curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq \
+    && curl -sL https://github.com/mikefarah/yq/releases/download/v4.7.1/yq_linux_386.tar.gz | tar xz && mv yq_linux_386 /usr/local/bin/yq \
     && curl -sL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py -o /usr/local/bin/speedtest \
     && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest \
     && RG_DEB="$(mktemp -t rg.XXXXX.deb)" && curl -L "https://github.com/BurntSushi/ripgrep/releases/download/$RIPGREP_VER/ripgrep_${RIPGREP_VER}_amd64.deb" -o "$RG_DEB" && dpkg -i "$RG_DEB" && rm "$RG_DEB"

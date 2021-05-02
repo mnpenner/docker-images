@@ -5,13 +5,7 @@
 # PS1='${debian_chroot:+($debian_chroot)}\h:\w\$ '
 # umask 022
 
-export LS_OPTIONS='--color=auto'
-eval $(dircolors -b)
-alias ls='ls $LS_OPTIONS'
-alias ll='ls $LS_OPTIONS -l'
-alias l='ls $LS_OPTIONS -lA'
+eval "$(dircolors -b)"
+alias ls='\ls --color=auto'
+alias ll='ls -lAhtrF'
 
-# Some more alias to avoid making mistakes:
-# alias rm='rm -i'
-# alias cp='cp -i'
-# alias mv='mv -i'

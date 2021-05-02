@@ -5,3 +5,6 @@ test: build
 
 build:
 	docker build . -t mpen/mercurial
+
+push: build
+	docker push mpen/mercurial

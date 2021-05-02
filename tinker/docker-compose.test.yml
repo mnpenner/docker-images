@@ -7,6 +7,7 @@ sut:
       command -v zsh
       && command -v node
       && command -v npm
+      && command -v pnpm
       && command -v yarn
       && command -v php
       && command -v composer
@@ -19,6 +20,7 @@ sut:
       && command -v pip
       && command -v htop
       && command -v jq
+      && command -v yq
       && command -v rsync
       && command -v speedtest
       && command -v ncdu
