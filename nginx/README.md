@@ -1,6 +1,6 @@
 # NginX
 
-- nginx 1.19.10
+- nginx 1.21.0
 - [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.33
 - [ngx_brotli](https://github.com/google/ngx_brotli)
 

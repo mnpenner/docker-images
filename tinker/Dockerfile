@@ -2,10 +2,10 @@ FROM mpen/zsh
 ARG RIPGREP_VER=12.1.1
 ARG MARIADB_VER=10.5
 ARG PHP_VER=7.4
-ARG NODE_VER=14.x
+ARG NODE_VER=16.x
 
 RUN . /etc/os-release \
-    && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils moreutils \
+    && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils moreutils wget \
     && curl -sL "https://deb.nodesource.com/setup_$NODE_VER" | bash - \
     && apt-key adv --fetch-keys \
         'https://dl.yarnpkg.com/debian/pubkey.gpg' \

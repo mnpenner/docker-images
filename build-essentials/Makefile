@@ -1,6 +1,10 @@
+NAME := mpen/build-essentials
 
 test: build
-	docker run --rm -it mpen/build-essentials /bin/bash -il
+	docker run --rm -it $(NAME) /bin/bash -il
 
 build:
-	docker build . -t mpen/build-essentials
+	docker build . -t $(NAME)
+
+push: build
+	docker push $(NAME)

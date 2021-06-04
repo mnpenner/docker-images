@@ -21,15 +21,20 @@ echo '[hg]' $(hg --version | head -n1)
 echo '=== Sync ==='
 echo '[rclone]' $(2>/dev/null rclone --version | head -n1)
 echo '[rsync]' $(rsync --version | head -n1)
-echo '=== Other ==='
-echo '[mariadb]' $(mariadb --version | head -n1)
+echo '=== HTTP ==='
+echo '[curl]' $(curl --version | head -n1)
+echo '[wget]' $(wget --version | head -n1)
+echo '[hxselect]' $(hxselect -v | head -n1)
+echo '[speedtest]' $(\grep -oPm1 $'^__version__\\s*=\\s*\'\\K([^\']+)' "$(command -v speedtest)")
+echo '=== File System ==='
+echo '[ncdu]' $(ncdu -v | head -n1)
 echo '[htop]' $(htop --version | head -n1)
+echo '[pydf]' $(pydf --version | head -n1)
+echo '[rg]' $(rg --version | head -n1)
+echo '[pv]' $(pv --version | head -n1)
+echo '[sponge]' $(man -f sponge | head -n1)
+echo '=== JSON/YAML ==='
 echo '[jq]' $(jq --version | head -n1)
 echo '[yq]' $(yq --version | head -n1)
-echo '[speedtest]' $(\grep -oPm1 $'^__version__\\s*=\\s*\'\\K([^\']+)' "$(command -v speedtest)")
-echo '[ncdu]' $(ncdu -v | head -n1)
-echo '[pydf]' $(pydf --version | head -n1)
-echo '[pv]' $(pv --version | head -n1)
-echo '[hxselect]' $(hxselect -v | head -n1)
-echo '[rg]' $(rg --version | head -n1)
-echo '[sponge]' $(man -f sponge | head -n1)
+echo '=== Database ==='
+echo '[mariadb]' $(mariadb --version | head -n1)

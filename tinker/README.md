@@ -38,3 +38,13 @@
     * `vidir` edit a directory in your text editor
     * `vipe` insert a text editor into a pipe
     * `zrun` automatically uncompress arguments to command
+
+## Quiet
+
+Run
+
+```sh
+docker run --rm -it mpen/tinker zsh -c 'zsh -i'
+```
+
+To avoid the `.zlogin` message that tells you what's installed.
