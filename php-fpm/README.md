@@ -11,6 +11,8 @@ Comes with the following extensions enabled:
 * `pdo_mysql`
 * `opcache`
 * `sodium`
+* `gd`
+* `imagick`
 
 Find settings to override:
 
