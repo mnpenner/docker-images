@@ -6,3 +6,4 @@ RUN install_packages git ca-certificates curl software-properties-common dirmngr
     && curl -s https://bootstrap.pypa.io/get-pip.py | python
 COPY .bashrc /root/.bashrc
 WORKDIR /root
+SHELL ["/bin/bash", "-c"]

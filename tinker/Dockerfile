@@ -1,8 +1,10 @@
 FROM mpen/zsh
-ARG RIPGREP_VER=12.1.1
-ARG MARIADB_VER=10.5
-ARG PHP_VER=7.4
-ARG NODE_VER=16.x
+ARG RIPGREP_VER=13.0.0
+ARG MARIADB_VER=10.7
+ARG PHP_VER=8.1
+ARG NODE_VER=17.x
+ARG JQ_VER=1.6
+ARG YQ_VER=4.16.2
 
 RUN . /etc/os-release \
     && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils moreutils wget \
@@ -21,10 +23,10 @@ RUN . /etc/os-release \
     && curl -sL 'https://getcomposer.org/composer-stable.phar' -o /usr/local/bin/composer \
     && curl -sL 'https://psysh.org/psysh' -o /usr/local/bin/psysh \
     && curl -s https://rclone.org/install.sh | bash \
-    && curl -s https://bootstrap.pypa.io/get-pip.py | python \
+    && curl -s https://bootstrap.pypa.io/get-pip.py | SETUPTOOLS_USE_DISTUTILS=1 python \
     && curl -sL https://pnpm.js.org/pnpm.js | node - add --global pnpm \
-    && curl -sL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq \
-    && curl -sL https://github.com/mikefarah/yq/releases/download/v4.7.1/yq_linux_386.tar.gz | tar xz && mv yq_linux_386 /usr/local/bin/yq \
+    && curl -sL https://github.com/stedolan/jq/releases/download/jq-$JQ_VER/jq-linux64 -o /usr/local/bin/jq \
+    && curl -sL https://github.com/mikefarah/yq/releases/download/v$YQ_VER/yq_linux_386.tar.gz | tar xz && mv yq_linux_386 /usr/local/bin/yq \
     && curl -sL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py -o /usr/local/bin/speedtest \
     && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest \
     && RG_DEB="$(mktemp -t rg.XXXXX.deb)" && curl -L "https://github.com/BurntSushi/ripgrep/releases/download/$RIPGREP_VER/ripgrep_${RIPGREP_VER}_amd64.deb" -o "$RG_DEB" && dpkg -i "$RG_DEB" && rm "$RG_DEB"

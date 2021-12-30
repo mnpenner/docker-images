@@ -1,8 +1,10 @@
-
-
+NAME := mpen/zsh
 
 test: build
-	docker run --rm -it mpen/zsh
+	docker run --rm -it $(NAME)
 
 build:
-	docker build . -t mpen/zsh
+	docker build . -t $(NAME)
+
+push: build
+	docker push $(NAME)
