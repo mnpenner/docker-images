@@ -23,7 +23,6 @@ RUN . /etc/os-release \
     && curl -sL 'https://getcomposer.org/composer-stable.phar' -o /usr/local/bin/composer \
     && curl -sL 'https://psysh.org/psysh' -o /usr/local/bin/psysh \
     && curl -s https://rclone.org/install.sh | bash \
-    && curl -s https://bootstrap.pypa.io/get-pip.py | SETUPTOOLS_USE_DISTUTILS=1 python \
     && curl -sL https://pnpm.js.org/pnpm.js | node - add --global pnpm \
     && curl -sL https://github.com/stedolan/jq/releases/download/jq-$JQ_VER/jq-linux64 -o /usr/local/bin/jq \
     && curl -sL https://github.com/mikefarah/yq/releases/download/v$YQ_VER/yq_linux_386.tar.gz | tar xz && mv yq_linux_386 /usr/local/bin/yq \

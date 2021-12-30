@@ -1,6 +1,6 @@
 # NginX
 
-- nginx 1.21.0
+- nginx 1.21.5
 - [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.33
 - [ngx_brotli](https://github.com/google/ngx_brotli)
 
@@ -28,9 +28,16 @@ hxcopy http://nginx.org/download/ -o . | hxnormalize -x | hxselect -s '\n' -c 'a
 ## Refresh mime.types
 
 ```shell
-id=$(docker create mpen/nginx)
-docker cp $id:/etc/nginx/mime.types mime.types
+id=$(docker create nginx)
+docker cp $id:/etc/nginx/mime.types mime.types.orig
 docker rm -v $id
+```
+
+or
+
+```sh
+docker run --rm --entrypoint cat nginx /etc/nginx/mime.types
+docker run --rm --entrypoint cat bitnami/nginx /opt/bitnami/nginx/conf/mime.types
 ```
 
 ## Not included
@@ -38,3 +45,22 @@ docker rm -v $id
 - [nginx-module-vts](https://github.com/vozlt/nginx-module-vts)
 - nginx-module-geoip
 - [nginx-module-substitutions-filter](https://github.com/yaoweibin/ngx_http_substitutions_filter_module)
+
+
+## Run in foreground (with logs)
+
+```sh
+docker run --rm -it -p 8080:80 mpen/nginx
+```
+
+## Run in background (detached)
+
+```sh
+docker run --rm -d -p 8080:80 --name nginx mpen/nginx
+```
+
+Stop it with
+
+```sh
+docker kill nginx
+```

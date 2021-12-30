@@ -29,6 +29,7 @@ types {
     application/vnd.openxmlformats-officedocument.spreadsheetml.sheet           xlsx;
     application/vnd.openxmlformats-officedocument.wordprocessingml.document     docx;
     application/vnd.wap.wmlc                         wmlc;
+    application/wasm                                 wasm;
     application/x-7z-compressed                      7z;
     application/x-cocoa                              cco;
     application/x-java-archive-diff                  jardiff;
@@ -55,6 +56,7 @@ types {
     font/ttf                                         ttf;
     font/woff                                        woff;
     font/woff2                                       woff2;
+    image/avif                                       avif;
     image/gif                                        gif;
     image/jpeg                                       jpeg jpg;
     image/png                                        png;
