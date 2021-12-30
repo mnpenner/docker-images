@@ -1,5 +1,7 @@
 # tinker
 
+A fully-loaded dev environment for running the latest software.
+
 ```
 Debian GNU/Linux 10 (buster)
 === Shell ===
@@ -49,7 +51,40 @@ Debian GNU/Linux 10 (buster)
 Run
 
 ```sh
-docker run --rm -it mpen/tinker zsh -c 'zsh -i'
+docker run --rm -it mpen/tinker zsh -i
 ```
 
 To avoid the `.zlogin` message that tells you what's installed.
+
+# REPLs
+
+## zsh
+
+```sh
+docker run --rm -it mpen/tinker
+```
+
+(The default command)
+
+## PHP:
+
+```sh
+docker run --rm -it mpen/tinker psysh
+```
+
+## Node:
+
+```sh
+docker run --rm -it mpen/tinker node
+```
+
+(Ctrl+D to exit)
+
+## MySQL/MariaDB:
+
+```sh
+docker run --rm -it mpen/tinker mysql -hhost.docker.internal -p
+```
+
+<!-- https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach -->
+
