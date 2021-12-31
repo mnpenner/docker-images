@@ -33,6 +33,11 @@ echo '[pydf]' $(pydf --version | head -n1)
 echo '[rg]' $(rg --version | head -n1)
 echo '[pv]' $(pv --version | head -n1)
 echo '[sponge]' $(man -f sponge | head -n1)
+echo '[neofetch]' $(neofetch --version)
+echo '=== Compression/Archives ==='
+echo '[7z]' $(7z | \grep -F ' Version ')
+echo '[unzip]' $(unzip -v | head -n1)
+echo '[tar]' $(tar --version | head -n1)
 echo '=== JSON/YAML ==='
 echo '[jq]' $(jq --version | head -n1)
 echo '[yq]' $(yq --version | head -n1)

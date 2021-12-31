@@ -7,7 +7,7 @@ ARG JQ_VER=1.6
 ARG YQ_VER=4.16.2
 
 RUN . /etc/os-release \
-    && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils moreutils wget \
+    && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils moreutils wget neofetch p7zip-full \
     && curl -sL "https://deb.nodesource.com/setup_$NODE_VER" | bash - \
     && apt-key adv --fetch-keys \
         'https://dl.yarnpkg.com/debian/pubkey.gpg' \
