@@ -39,6 +39,11 @@ Debian GNU/Linux 10 (buster)
 [rg] ripgrep 13.0.0 (rev 7ec2fd51ba)
 [pv] pv 1.6.6 - Copyright 2015 Andrew Wood <andrew.wood@ivarch.com>
 [sponge] sponge (1) - soak up standard input and write to a file
+[neofetch] Neofetch 6.0.0
+=== Compression/Archives ===
+[7z] p7zip Version 16.02 (locale=C,Utf16=off,HugeFiles=on,64 bits,16 CPUs 11th Gen Intel(R) Core(TM) i9-11900K @ 3.50GHz (A0671),ASM,AES-NI)
+[unzip] UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
+[tar] tar (GNU tar) 1.30
 === JSON/YAML ===
 [jq] jq-1.6
 [yq] yq (https://github.com/mikefarah/yq/) version 4.16.2
