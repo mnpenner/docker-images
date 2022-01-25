@@ -1,5 +1,5 @@
 FROM mpen/build-essentials
-ARG VERSION=5.9.2
+ARG VERSION=5.9.3
 
 # see also rhg: https://fossies.org/linux/mercurial/rust/rhg/README.md
 WORKDIR /work
