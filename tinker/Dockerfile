@@ -4,7 +4,7 @@ ARG MARIADB_VER=10.7
 ARG PHP_VER=8.1
 ARG NODE_VER=17.x
 ARG JQ_VER=1.6
-ARG YQ_VER=4.16.2
+ARG YQ_VER=4.17.2
 
 RUN . /etc/os-release \
     && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils moreutils wget neofetch p7zip-full \
@@ -22,10 +22,10 @@ RUN . /etc/os-release \
     && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
     && curl -sL 'https://getcomposer.org/composer-stable.phar' -o /usr/local/bin/composer \
     && curl -sL 'https://psysh.org/psysh' -o /usr/local/bin/psysh \
-    && curl -s https://rclone.org/install.sh | bash \
+    && curl -sL https://rclone.org/install.sh | bash \
     && curl -sL https://pnpm.js.org/pnpm.js | node - add --global pnpm \
     && curl -sL https://github.com/stedolan/jq/releases/download/jq-$JQ_VER/jq-linux64 -o /usr/local/bin/jq \
-    && curl -sL https://github.com/mikefarah/yq/releases/download/v$YQ_VER/yq_linux_386.tar.gz | tar xz && mv yq_linux_386 /usr/local/bin/yq \
+    && TMP_DIR="$(mktemp -d)" && cd "$TMP_DIR" && curl -sL https://github.com/mikefarah/yq/releases/download/v$YQ_VER/yq_linux_386.tar.gz | tar xz && mv yq_linux_386 /usr/local/bin/yq && ./install-man-page.sh && rm -r "$TMP_DIR" \
     && curl -sL https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py -o /usr/local/bin/speedtest \
     && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest \
     && RG_DEB="$(mktemp -t rg.XXXXX.deb)" && curl -L "https://github.com/BurntSushi/ripgrep/releases/download/$RIPGREP_VER/ripgrep_${RIPGREP_VER}_amd64.deb" -o "$RG_DEB" && dpkg -i "$RG_DEB" && rm "$RG_DEB"
