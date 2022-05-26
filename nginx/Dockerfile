@@ -7,6 +7,8 @@ ARG GID=101
 EXPOSE 80
 STOPSIGNAL SIGTERM
 
+# TODO: add http/3 aka quic: https://www.nginx.com/blog/our-roadmap-quic-http-3-support-nginx/
+# https://codefaq.org/server/how-to-install-http-3-quic-on-nginx-server-for-ubuntu/
 RUN install_packages libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev \
     && BUILD_DIR=$(mktemp -dt build.XXX) && cd $BUILD_DIR \
     && curl -sL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz | tar xz --strip=1 --one-top-level=nginx  \

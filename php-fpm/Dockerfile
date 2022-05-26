@@ -3,7 +3,7 @@ FROM php:${PHP_VERSION}-fpm
 
 ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
 
-RUN apt-get update && apt-get install -y --no-install-recommends libzip-dev unzip libfcgi-bin libmagickwand-dev \
+RUN apt-get update && apt-get install -y --no-install-recommends libzip-dev libpng-dev unzip libfcgi-bin libmagickwand-dev \
     && pecl install imagick \
     && docker-php-ext-install -j$(nproc) pdo_mysql bcmath zip opcache gd \
     && docker-php-ext-enable imagick \
