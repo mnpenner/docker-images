@@ -1,7 +1,7 @@
 # NginX
 
-- nginx 1.21.6
-- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.33
+- nginx 1.23.1
+- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.34
 - [ngx_brotli](https://github.com/google/ngx_brotli)
 
 
@@ -16,7 +16,7 @@ docker run --rm nginx nginx -V
 docker run --rm bitnami/nginx nginx -V
 docker run --rm mpen/nginx nginx -V
 
-diff -y -W "$(tput cols)" <(docker run --rm bitnami/nginx cat /opt/bitnami/nginx/conf/mime.types) <(docker run --rm mpen/nginx cat /etc/nginx/mime.types)
+diff -y -W "$(tput cols)" <(docker run --rm bitnami/nginx cat /opt/bitnami/nginx/conf/mime.types | sort) <(docker run --rm mpen/nginx cat /etc/nginx/mime.types | sort)
 ```
 
 ## Latest version
