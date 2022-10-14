@@ -6,13 +6,13 @@ Uses production configuration and runs as `www-data:www-data` by default.
 
 Comes with the following extensions enabled:
 
-* `zip`
 * `bcmath`
-* `pdo_mysql`
-* `opcache`
-* `sodium`
 * `gd`
 * `imagick`
+* `opcache`
+* `pdo_mysql`
+* `sodium`
+* `zip`
 
 Find settings to override:
 
