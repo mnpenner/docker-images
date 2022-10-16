@@ -2,8 +2,8 @@ ARG PHP_VERSION=7.4
 FROM php:${PHP_VERSION}-fpm
 ARG COMPOSER_PHAR="https://getcomposer.org/download/latest-2.2.x/composer.phar"
 
-ENV PHP_FPM_DIR /usr/local/etc/php-fpm.d
-ENV FCGI_STATUS_PATH=/f84ff056-7b45-4439-91dd-c40204e5dc4d
+ENV PHP_FPM_DIR=/usr/local/etc/php-fpm.d
+ENV FCGI_STATUS_PATH=/php-fpm-status
 
 RUN apt-get update && apt-get install -y --no-install-recommends libzip-dev libpng-dev unzip libfcgi-bin libmagickwand-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev
 
