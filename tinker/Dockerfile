@@ -1,10 +1,10 @@
 FROM mpen/zsh
 ARG RIPGREP_VER=13.0.0
-ARG MARIADB_VER=10.7
-ARG PHP_VER=8.1
-ARG NODE_VER=17.x
+ARG MARIADB_VER=10.10
+ARG PHP_VER=8.2
+ARG NODE_VER=18.x
 ARG JQ_VER=1.6
-ARG YQ_VER=4.17.2
+ARG YQ_VER=4.30.6
 
 RUN . /etc/os-release \
     && install_packages xz-utils nano less zip unzip htop rsync ncdu pydf pv html-xml-utils moreutils wget neofetch p7zip-full \
@@ -30,7 +30,8 @@ RUN . /etc/os-release \
     && chmod +x /usr/local/bin/composer /usr/local/bin/psysh /usr/local/bin/jq /usr/local/bin/speedtest \
     && RG_DEB="$(mktemp -t rg.XXXXX.deb)" && curl -L "https://github.com/BurntSushi/ripgrep/releases/download/$RIPGREP_VER/ripgrep_${RIPGREP_VER}_amd64.deb" -o "$RG_DEB" && dpkg -i "$RG_DEB" && rm "$RG_DEB"
 
-COPY --from=mpen/mercurial /work /tmp/hg
-RUN cd /tmp/hg && make PREFIX=/usr install && rm -r /tmp/hg
+COPY --from=mpen/mercurial /opt/hg /opt/hg
+RUN cd /opt/hg && make PREFIX=/usr install && install -m 755 rust/target/release/rhg /usr/bin/
 
+COPY hgrc /root/.hgrc
 COPY .zlogin /root/.zlogin
