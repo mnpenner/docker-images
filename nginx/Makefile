@@ -1,7 +1,7 @@
 NAME := mpen/nginx
 # Check http://nginx.org/en/download.html for latest version.
 MINOR_VERSION := 1.23
-PATCH_VERSION := 1.23.1
+PATCH_VERSION := 1.23.3
 HEADERS_MORE_VERSION := 0.34
 
 test: build
