@@ -1,0 +1,1 @@
+docker run -it --gpus=all --rm -p 7860:7860 --entrypoint python --mount "type=bind,src=D:/oobabooga/text-generation-webui/models,dst=/srv/models,readonly" oobabooga /srv/server.py --auto-devices --chat --model=gpt4-x-alpaca-13b-native-4bit-128g --wbits=4 --groupsize=128 --gpu-memory=18 --listen --xformers
