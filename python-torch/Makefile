@@ -1,7 +1,7 @@
 NAME := mpen/python-torch
 
 build:
-	docker build . -t $(NAME):11.7 --build-arg CUDA_VERSION=11.7.1 --build-arg UBUNTU_VERSION=22.04
+	#docker build . -t $(NAME):11.7 --build-arg CUDA_VERSION=11.7.1 --build-arg UBUNTU_VERSION=22.04
 	docker build . -t $(NAME):12.1 --build-arg CUDA_VERSION=12.1.0 --build-arg UBUNTU_VERSION=22.04
 
 run: build
