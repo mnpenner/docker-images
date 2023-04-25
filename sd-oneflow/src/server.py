@@ -12,6 +12,8 @@ import oneflow as flow
 flow.mock_torch.enable()
 from onediff import OneFlowStableDiffusionPipeline
 from PIL import Image
+import datetime
+
 
 OUTPUT_DIR = 'outputs'
 PORT = 7860
@@ -73,13 +75,14 @@ class JsonRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(400, "Invalid JSON")
             return
 
-        with flow.autocast("cuda"):
+        with flow.autocast(DEVICE):
+            # TODO: other schedulers: https://huggingface.co/stabilityai/stable-diffusion-2-1/discussions/23
             if "seed" in json_request:
                 json_request["generator"] = flow.Generator(device=DEVICE).manual_seed(json_request["seed"])
                 del json_request["seed"]
+            json_request["output_type"] = "pil"
             image = pipe(**json_request).images[0]
-            dst = os.path.join(OUTPUT_DIR, f"{json_request['prompt'][:100]}.png")
-            image.save(dst)
+
 
             buffer = io.BytesIO()
             image.save(buffer, "PNG")
@@ -93,6 +96,12 @@ class JsonRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             # Send the image as a response
             self.wfile.write(buffer.getvalue())
+
+            now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+            filename = f"{now}-{json_request['prompt'][:100]}.png"
+            dst = os.path.join(OUTPUT_DIR, filename)
+            image.save(dst)
+            print(f"Saved {filename}")
 
 
 
