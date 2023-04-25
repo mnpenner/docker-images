@@ -1,0 +1,2 @@
+- https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_diffusion/text2img#diffusers.StableDiffusionPipeline.from_ckpt
+- https://github.com/huggingface/diffusers/issues/2363#issuecomment-1515040592
