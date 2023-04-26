@@ -7,6 +7,13 @@ RUN curl -sL "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64
     bash /tmp/miniconda.sh -b -p /opt/conda && \
     rm /tmp/miniconda.sh
 ENV PATH="/opt/conda/bin:$PATH"
-RUN pip install torch torchvision torchaudio xformers ninja
+ENV PIP_ROOT_USER_ACTION=ignore
+RUN python -m pip install --upgrade pip
+RUN pip install accelerate ninja
+RUN pip install torch torchvision torchaudio xformers
+RUN pip install git+https://github.com/huggingface/diffusers
 
-ENTRYPOINT [ "python" ]
+COPY entrypoint.sh /entrypoint.sh
+WORKDIR /workspace
+
+ENTRYPOINT [ "/entrypoint.sh" ]
