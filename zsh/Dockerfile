@@ -6,7 +6,7 @@ RUN curl -sL https://api.github.com/repos/trapd00r/LS_COLORS/tarball/master | ta
 
 FROM mpen/build-essentials as zinit
 WORKDIR /work
-RUN git clone --depth=1 https://github.com/zdharma-continuum/zinit.git zinit && rm -r zinit/{.git*,doc,.dockerignore}
+RUN git clone --depth=1 https://github.com/zdharma-continuum/zinit.git zinit && rm -r zinit/{.git*,.dockerignore}
 
 
 FROM mpen/build-essentials

@@ -33,5 +33,5 @@ RUN . /etc/os-release \
 COPY --from=mpen/mercurial /opt/hg /opt/hg
 RUN cd /opt/hg && make PREFIX=/usr install && install -m 755 rust/target/release/rhg /usr/bin/
 
-COPY hgrc /root/.hgrc
+COPY .hgrc /root/.hgrc
 COPY .zlogin /root/.zlogin
