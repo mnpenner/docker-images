@@ -1,7 +1,7 @@
 # NginX
 
-- nginx 1.23.1
-- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.34
+- nginx 1.25.4
+- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.37
 - [ngx_brotli](https://github.com/google/ngx_brotli)
 
 
