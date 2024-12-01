@@ -43,4 +43,5 @@ RUN curl -s https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/mas
 # Configure PHP-FPM
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
     && rm "$PHP_INI_DIR/php.ini-development" "$PHP_FPM_DIR/www.conf.default" \
-    && echo "pm.status_path = $FCGI_STATUS_PATH" >> /usr/local/etc/php-fpm.d/zz-docker.conf
+    && echo "pm.status_path = $FCGI_STATUS_PATH" >> /usr/local/etc/php-fpm.d/zz-docker.conf \
+    && printf '\ninclude_path = ".:/usr/local/lib/php:/usr/local/etc/php/conf.d"\n' >> /usr/local/etc/php/php.ini
