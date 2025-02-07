@@ -1,6 +1,6 @@
 NAME := mpen/nginx
 # Check http://nginx.org/en/download.html for latest version.
-NGINX_VERSION := 1.24.0
+NGINX_VERSION := 1.26.2
 
 test: build
 	docker run --rm -it $(NAME) bash -il
