@@ -19,7 +19,7 @@ h1, a {
 pre {
     font-family: Consolas, "courier new", sans-serif;
     background-color: #F1F1F1;
-    white-space: pre-line;
+    white-space: pre-wrap;
     padding: 10px 20px;
 }
 

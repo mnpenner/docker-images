@@ -3,7 +3,7 @@ NAME := mpen/nginx
 NGINX_VERSION := 1.26.2
 
 test: build
-	docker run --rm -it $(NAME) bash -il
+	docker run --rm -it $(NAME) sh -il
 
 serve: build
 	docker run --rm -it -p 3000:80 $(NAME)
