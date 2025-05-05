@@ -5,7 +5,11 @@ RUN apk add brotli nginx~=$NGINX_VERSION nginx-mod-http-brotli nginx-mod-http-he
 # This will create group `nginx:x:101:nginx` automatically
 
 EXPOSE 80
-STOPSIGNAL SIGTERM
+# Use SIGQUIT intead of SIGTERM to give chance for graceful shutdown
+# https://github.com/nginx/docker-nginx/issues/377
+# https://medium.com/codecademy-engineering/kubernetes-nginx-and-zero-downtime-in-production-2c910c6a5ed8
+# https://github.com/kubernetes/kubernetes/issues/30051
+STOPSIGNAL SIGQUIT
 
 COPY nginx.conf mime.types /etc/nginx/
 COPY http.d /etc/nginx/http.d
