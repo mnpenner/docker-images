@@ -1,6 +1,6 @@
 # NginX
 
-- nginx 1.26.2
+- nginx 1.26.3
 - [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.37
 - [ngx_brotli](https://github.com/google/ngx_brotli)
 - [nginx-mod-http-zstd](https://github.com/tokers/zstd-nginx-module)
