@@ -10,6 +10,9 @@ php72:
 php74:
 	docker build . --build-arg PHP_VERSION=7.4.33 --build-arg COMPOSER_PHAR="https://getcomposer.org/download/latest-2.2.x/composer.phar" -t $(NAME):7.4 -t $(NAME):7.4.33
 
+php80:
+	docker build . --build-arg PHP_VERSION=8.0.28 --build-arg COMPOSER_PHAR="https://getcomposer.org/download/latest-stable/composer.phar" -t $(NAME):8.0 -t $(NAME):8.0.28
+
 mod72: php72
 	docker run --rm -it $(NAME):7.2.34 php -m
 
@@ -20,7 +23,7 @@ php81:
 	#curl https://getcomposer.org/download/latest-stable/composer.phar -o composer-stable.phar
 	docker build . --build-arg PHP_VERSION=8.1.11 --build-arg COMPOSER_PHAR="https://getcomposer.org/download/latest-stable/composer.phar" -t $(NAME):8.1 -t $(NAME):8.1.11 -t $(NAME):latest
 
-build: php74 # php71 php81
+build: php74 php80 # php71 php81
 
 #docker build . --build-arg PHP_VERSION=7.1.33 -t $(NAME):7.1 -t $(NAME):7.1.33
 #docker build . --build-arg PHP_VERSION=7.4 -t $(NAME):7.4
