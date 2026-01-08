@@ -31,31 +31,31 @@ type PodmanBuildOptions = {
     /** Build context directory. */
     context?: string
     /** Add a custom host-to-IP mapping (host:ip). */
-    addHost?: string[]
+    addHost?: string | string[]
     /** Attempt to build for all base image platforms. */
     allPlatforms?: boolean
     /** Set metadata for an image. */
-    annotation?: string[]
+    annotation?: string | string[]
     /** Set the ARCH of the image to the provided value instead of the architecture of the host. */
     arch?: string
     /** Path of the authentication file. */
     authfile?: string
     /** Argument=value to supply to the builder. */
-    buildArg?: string[]
+    buildArg?: string | string[]
     /** Argfile.conf containing lines of argument=value to supply to the builder. */
     buildArgFile?: string
     /** Argument=value to supply additional build context to the builder. */
-    buildContext?: string[]
+    buildContext?: string | string[]
     /** Remote repository list to utilise as potential cache source. */
-    cacheFrom?: string[]
+    cacheFrom?: string | string[]
     /** Remote repository list to utilise as potential cache destination. */
-    cacheTo?: string[]
+    cacheTo?: string | string[]
     /** Only consider cache images under specified duration. */
     cacheTtl?: string
     /** Add the specified capability when running. */
-    capAdd?: string[]
+    capAdd?: string | string[]
     /** Drop the specified capability when running. */
-    capDrop?: string[]
+    capDrop?: string | string[]
     /** Use certificates at the specified path to access the registry. */
     certDir?: string
     /** Optional parent cgroup for the container. */
@@ -65,7 +65,7 @@ type PodmanBuildOptions = {
     /** Preserve the contents of VOLUMEs during RUN instructions. */
     compatVolumes?: boolean
     /** Set additional flag to pass to C preprocessor (cpp). */
-    cppFlag?: string[]
+    cppFlag?: string | string[]
     /** Limit the CPU CFS (Completely Fair Scheduler) period. */
     cpuPeriod?: number
     /** Limit the CPU CFS (Completely Fair Scheduler) quota. */
@@ -81,19 +81,19 @@ type PodmanBuildOptions = {
     /** Use username[:password] for accessing the registry. */
     creds?: string
     /** Key needed to decrypt the image. */
-    decryptionKey?: string[]
+    decryptionKey?: string | string[]
     /** Additional devices to provide. */
-    device?: string[]
+    device?: string | string[]
     /** Do not compress layers by default. */
     disableCompression?: boolean
     /** Set custom DNS servers or disable it completely by setting it to 'none'. */
     dns?: string
     /** Set custom DNS options. */
-    dnsOption?: string[]
+    dnsOption?: string | string[]
     /** Set custom DNS search domains. */
-    dnsSearch?: string[]
+    dnsSearch?: string | string[]
     /** Set environment variable for the image. */
-    env?: string[]
+    env?: string | string[]
     /** Pathname or URL of a Dockerfile. */
     file?: string
     /** Always remove intermediate containers after a build, even if the build is unsuccessful. */
@@ -103,9 +103,9 @@ type PodmanBuildOptions = {
     /** Image name used to replace the value in the first FROM instruction in the Containerfile. */
     from?: string
     /** Add additional groups to the primary container process. */
-    groupAdd?: string[]
+    groupAdd?: string | string[]
     /** Set the OCI hooks directory path (may be set multiple times). */
-    hooksDir?: string[]
+    hooksDir?: string | string[]
     /** Pass through HTTP Proxy environment variables. */
     httpProxy?: boolean
     /** Add default identity label. */
@@ -125,9 +125,9 @@ type PodmanBuildOptions = {
     /** How many stages to run in parallel. */
     jobs?: number
     /** Set metadata for an image. */
-    label?: string[]
+    label?: string | string[]
     /** Set metadata for an intermediate image. */
-    layerLabel?: string[]
+    layerLabel?: string | string[]
     /** Use intermediate layers during build. */
     layers?: boolean
     /** Log to file instead of stdout/stderr. */
@@ -171,7 +171,7 @@ type PodmanBuildOptions = {
     /** Remove intermediate containers after a successful build. */
     rm?: boolean
     /** Add global flags for the container runtime. */
-    runtimeFlag?: string[]
+    runtimeFlag?: string | string[]
     /** Scan working container using preset configuration. */
     sbom?: string
     /** Add scan results to image as path. */
@@ -189,9 +189,9 @@ type PodmanBuildOptions = {
     /** Scan working container using scanner command from image. */
     sbomScannerImage?: string
     /** Secret file to expose to the build. */
-    secret?: string[]
+    secret?: string | string[]
     /** Security options. */
-    securityOpt?: string[]
+    securityOpt?: string | string[]
     /** Size of '/dev/shm'. The format is <number><unit>. */
     shmSize?: string
     /** Skips stages in multi-stage builds which do not affect the final target. */
@@ -203,23 +203,23 @@ type PodmanBuildOptions = {
     /** Squash all layers into a single layer. */
     squashAll?: boolean
     /** SSH agent socket or keys to expose to the build. */
-    ssh?: string[]
+    ssh?: string | string[]
     /** Pass stdin into containers. */
     stdin?: boolean
     /** Tagged name to apply to the built image. */
-    tag?: string[]
+    tag?: string | string[]
     /** Set the target build stage to build. */
     target?: string
     /** Set new timestamps in image info and layer to seconds after the epoch. */
     timestamp?: number
     /** Ulimit options. */
-    ulimit?: string[]
+    ulimit?: string | string[]
     /** Unset annotation when inheriting annotations from base image. */
-    unsetannotation?: string[]
+    unsetannotation?: string | string[]
     /** Unset environment variable from final image. */
-    unsetenv?: string[]
+    unsetenv?: string | string[]
     /** Unset label when inheriting labels from base image. */
-    unsetlabel?: string[]
+    unsetlabel?: string | string[]
     /** 'container', path of user namespace to join, or 'host'. */
     userns?: string
     /** ContainerGID:hostGID:length GID mapping to use in user namespace. */
@@ -235,7 +235,7 @@ type PodmanBuildOptions = {
     /** Override the variant of the specified image. */
     variant?: string
     /** Bind mount a volume into the container. */
-    volume?: string[]
+    volume?: string | string[]
 }
 
 /**
@@ -279,9 +279,11 @@ export async function build(options: PodmanBuildOptions = {}): Promise<string> {
         }
         args.push(`${flag}=false`)
     }
-    const addValues = (flag: string, values?: string[]) => {
-        if (!values?.length) return
-        for (const value of values) {
+    const addValues = (flag: string, values?: string | string[]) => {
+        if (!values) return
+        const list = Array.isArray(values) ? values : [values]
+        if (!list.length) return
+        for (const value of list) {
             args.push(flag, value)
         }
     }
