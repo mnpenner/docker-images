@@ -57,8 +57,15 @@ types {
     font/woff                                        woff;
     font/woff2                                       woff2;
     image/avif                                       avif;
+    image/avif-sequence                              avifs;
+    image/apng                                       apng;
     image/gif                                        gif;
+    image/heic                                       heic;
+    image/heif                                       heif;
+    image/heic-sequence                              heics;
+    image/heif-sequence                              heifs;
     image/jpeg                                       jpeg jpg;
+    image/jxl                                        jxl;
     image/png                                        png;
     image/svg+xml                                    svg svgz;
     image/tiff                                       tif tiff;
