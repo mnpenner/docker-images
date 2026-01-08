@@ -12,21 +12,39 @@ const PARSE_CONFIG = {
 async function main(values: Values, positionals: Positionals): Promise<number | void> {
     await podman.startMachine()
 
-    const mainlineVersion = '1.29.4'
+    const mainlineVersion = '1.28.0'
     const stableVersion = '1.28.0'
     const image = 'mpen/nginx'
 
-    await podman.build({
-        tag: [`${image}:${stableVersion}`, `${image}:mainline`, `${image}:latest`],
-        buildArg: `NGINX_VERSION=${stableVersion}`,
-        context: __dirname,
-    })
+    const builds = [
+        {
+            version: mainlineVersion,
+            tags: [`${image}:mainline`, `${image}:latest`],
+            alpineVersion: 'edge',
+        },
+        {
+            version: stableVersion,
+            tags: [`${image}:stable`],
+            alpineVersion: 'latest',
+        },
+    ]
 
-    await podman.build({
-        tag: [`${image}:${stableVersion}`, `${image}:stable`],
-        buildArg: `NGINX_VERSION=${stableVersion}`,
-        context: __dirname,
-    })
+    const allTags: string[] = []
+    for(const build of builds) {
+        allTags.push(`${image}:${build.version}`, ...build.tags)
+        await podman.build({
+            tag: build.tags,
+            buildArg: [
+                `ALPINE_VERSION=${build.alpineVersion}`,
+                `NGINX_VERSION=${build.version}`,
+            ],
+            context: __dirname,
+        })
+    }
+
+    for(const tag of allTags) {
+        await podman.push({image: tag})
+    }
 }
 
 

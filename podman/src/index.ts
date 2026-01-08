@@ -1,5 +1,6 @@
 import {execFile, spawn} from 'node:child_process'
 import {promisify} from 'node:util'
+import {ArgBuilder} from './arg-builder.ts'
 
 const execFileAsync = promisify(execFile)
 
@@ -27,12 +28,16 @@ async function execPodman(args: string[]): Promise<string> {
     return stdout
 }
 
-async function execPodmanStreaming(args: string[]): Promise<number> {
+async function execPodmanStreaming(args: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
         const child = spawn('podman', args, {stdio: 'inherit'})
         child.on('error', reject)
         child.on('close', (code) => {
-            resolve(code ?? 0)
+            if (code && code !== 0) {
+                reject(new Error(`podman ${args[0]} exited with code ${code}`))
+                return
+            }
+            resolve()
         })
     })
 }
@@ -303,180 +308,146 @@ export async function startMachine(machineName = 'podman-machine-default'): Prom
  * Builds a container image using podman build.
  *
  * @param options Build options for podman build.
- * @returns The podman build exit code.
+ * @returns Resolves when the build succeeds.
  */
-export async function build(options: PodmanBuildOptions = {}): Promise<number> {
-    const args: string[] = ['build']
+export async function build(options: PodmanBuildOptions = {}): Promise<void> {
+    const args = new ArgBuilder('build')
 
-    const addValue = (flag: string, value?: string | number) => {
-        if(value === undefined) return
-        args.push(flag, String(value))
-    }
-    const addBool = (flag: string, value?: boolean) => {
-        if(value === undefined) return
-        if(value) {
-            args.push(flag)
-            return
-        }
-        args.push(`${flag}=false`)
-    }
-    const addValues = (flag: string, values?: string | string[]) => {
-        if(!values) return
-        const list = Array.isArray(values) ? values : [values]
-        if(!list.length) return
-        for(const value of list) {
-            args.push(flag, value)
-        }
-    }
+    args.addValues('--add-host', options.addHost)
+    args.addBool('--all-platforms', options.allPlatforms)
+    args.addValues('--annotation', options.annotation)
+    args.addValue('--arch', options.arch)
+    args.addValue('--authfile', options.authfile)
+    args.addValues('--build-arg', options.buildArg)
+    args.addValue('--build-arg-file', options.buildArgFile)
+    args.addValues('--build-context', options.buildContext)
+    args.addValues('--cache-from', options.cacheFrom)
+    args.addValues('--cache-to', options.cacheTo)
+    args.addValue('--cache-ttl', options.cacheTtl)
+    args.addValues('--cap-add', options.capAdd)
+    args.addValues('--cap-drop', options.capDrop)
+    args.addValue('--cert-dir', options.certDir)
+    args.addValue('--cgroup-parent', options.cgroupParent)
+    args.addValue('--cgroupns', options.cgroupns)
+    args.addBool('--compat-volumes', options.compatVolumes)
+    args.addValues('--cpp-flag', options.cppFlag)
+    args.addValue('--cpu-period', options.cpuPeriod)
+    args.addValue('--cpu-quota', options.cpuQuota)
+    args.addValue('--cpu-shares', options.cpuShares)
+    args.addValue('--cpuset-cpus', options.cpusetCpus)
+    args.addValue('--cpuset-mems', options.cpusetMems)
+    args.addBool('--created-annotation', options.createdAnnotation)
+    args.addValue('--creds', options.creds)
+    args.addValues('--decryption-key', options.decryptionKey)
+    args.addValues('--device', options.device)
+    args.addBool('--disable-compression', options.disableCompression)
+    args.addValue('--dns', options.dns)
+    args.addValues('--dns-option', options.dnsOption)
+    args.addValues('--dns-search', options.dnsSearch)
+    args.addValues('--env', options.env)
+    args.addValue('--file', options.file)
+    args.addBool('--force-rm', options.forceRm)
+    args.addValue('--format', options.format)
+    args.addValue('--from', options.from)
+    args.addValues('--group-add', options.groupAdd)
+    args.addValues('--hooks-dir', options.hooksDir)
+    args.addBool('--http-proxy', options.httpProxy)
+    args.addBool('--identity-label', options.identityLabel)
+    args.addValue('--ignorefile', options.ignorefile)
+    args.addValue('--iidfile', options.iidfile)
+    args.addBool('--inherit-annotations', options.inheritAnnotations)
+    args.addBool('--inherit-labels', options.inheritLabels)
+    args.addValue('--ipc', options.ipc)
+    args.addValue('--isolation', options.isolation)
+    args.addValue('--jobs', options.jobs)
+    args.addValues('--label', options.label)
+    args.addValues('--layer-label', options.layerLabel)
+    args.addBool('--layers', options.layers)
+    args.addValue('--logfile', options.logfile)
+    args.addValue('--manifest', options.manifest)
+    args.addValue('--memory', options.memory)
+    args.addValue('--memory-swap', options.memorySwap)
+    args.addValue('--network', options.network)
+    args.addBool('--no-cache', options.noCache)
+    args.addBool('--no-hostname', options.noHostname)
+    args.addBool('--no-hosts', options.noHosts)
+    args.addBool('--omit-history', options.omitHistory)
+    args.addValue('--os', options.os)
+    args.addValue('--os-feature', options.osFeature)
+    args.addValue('--os-version', options.osVersion)
+    args.addValue('--pid', options.pid)
+    args.addValue('--platform', options.platform)
+    args.addValue('--pull', options.pull)
+    args.addBool('--quiet', options.quiet)
+    args.addValue('--retry', options.retry)
+    args.addValue('--retry-delay', options.retryDelay)
+    args.addBool('--rewrite-timestamp', options.rewriteTimestamp)
+    args.addBool('--rm', options.rm)
+    args.addValues('--runtime-flag', options.runtimeFlag)
+    args.addValue('--sbom', options.sbom)
+    args.addValue('--sbom-image-output', options.sbomImageOutput)
+    args.addValue('--sbom-image-purl-output', options.sbomImagePurlOutput)
+    args.addValue('--sbom-merge-strategy', options.sbomMergeStrategy)
+    args.addValue('--sbom-output', options.sbomOutput)
+    args.addValue('--sbom-purl-output', options.sbomPurlOutput)
+    args.addValue('--sbom-scanner-command', options.sbomScannerCommand)
+    args.addValue('--sbom-scanner-image', options.sbomScannerImage)
+    args.addValues('--secret', options.secret)
+    args.addValues('--security-opt', options.securityOpt)
+    args.addValue('--shm-size', options.shmSize)
+    args.addBool('--skip-unused-stages', options.skipUnusedStages)
+    args.addValue('--source-date-epoch', options.sourceDateEpoch)
+    args.addBool('--squash', options.squash)
+    args.addBool('--squash-all', options.squashAll)
+    args.addValues('--ssh', options.ssh)
+    args.addBool('--stdin', options.stdin)
+    args.addValues('--tag', options.tag)
+    args.addValue('--target', options.target)
+    args.addValue('--timestamp', options.timestamp)
+    args.addValues('--ulimit', options.ulimit)
+    args.addValues('--unsetannotation', options.unsetannotation)
+    args.addValues('--unsetenv', options.unsetenv)
+    args.addValues('--unsetlabel', options.unsetlabel)
+    args.addValue('--userns', options.userns)
+    args.addValue('--userns-gid-map', options.usernsGidMap)
+    args.addValue('--userns-gid-map-group', options.usernsGidMapGroup)
+    args.addValue('--userns-uid-map', options.usernsUidMap)
+    args.addValue('--userns-uid-map-user', options.usernsUidMapUser)
+    args.addValue('--uts', options.uts)
+    args.addValue('--variant', options.variant)
+    args.addValues('--volume', options.volume)
 
-    addValues('--add-host', options.addHost)
-    addBool('--all-platforms', options.allPlatforms)
-    addValues('--annotation', options.annotation)
-    addValue('--arch', options.arch)
-    addValue('--authfile', options.authfile)
-    addValues('--build-arg', options.buildArg)
-    addValue('--build-arg-file', options.buildArgFile)
-    addValues('--build-context', options.buildContext)
-    addValues('--cache-from', options.cacheFrom)
-    addValues('--cache-to', options.cacheTo)
-    addValue('--cache-ttl', options.cacheTtl)
-    addValues('--cap-add', options.capAdd)
-    addValues('--cap-drop', options.capDrop)
-    addValue('--cert-dir', options.certDir)
-    addValue('--cgroup-parent', options.cgroupParent)
-    addValue('--cgroupns', options.cgroupns)
-    addBool('--compat-volumes', options.compatVolumes)
-    addValues('--cpp-flag', options.cppFlag)
-    addValue('--cpu-period', options.cpuPeriod)
-    addValue('--cpu-quota', options.cpuQuota)
-    addValue('--cpu-shares', options.cpuShares)
-    addValue('--cpuset-cpus', options.cpusetCpus)
-    addValue('--cpuset-mems', options.cpusetMems)
-    addBool('--created-annotation', options.createdAnnotation)
-    addValue('--creds', options.creds)
-    addValues('--decryption-key', options.decryptionKey)
-    addValues('--device', options.device)
-    addBool('--disable-compression', options.disableCompression)
-    addValue('--dns', options.dns)
-    addValues('--dns-option', options.dnsOption)
-    addValues('--dns-search', options.dnsSearch)
-    addValues('--env', options.env)
-    addValue('--file', options.file)
-    addBool('--force-rm', options.forceRm)
-    addValue('--format', options.format)
-    addValue('--from', options.from)
-    addValues('--group-add', options.groupAdd)
-    addValues('--hooks-dir', options.hooksDir)
-    addBool('--http-proxy', options.httpProxy)
-    addBool('--identity-label', options.identityLabel)
-    addValue('--ignorefile', options.ignorefile)
-    addValue('--iidfile', options.iidfile)
-    addBool('--inherit-annotations', options.inheritAnnotations)
-    addBool('--inherit-labels', options.inheritLabels)
-    addValue('--ipc', options.ipc)
-    addValue('--isolation', options.isolation)
-    addValue('--jobs', options.jobs)
-    addValues('--label', options.label)
-    addValues('--layer-label', options.layerLabel)
-    addBool('--layers', options.layers)
-    addValue('--logfile', options.logfile)
-    addValue('--manifest', options.manifest)
-    addValue('--memory', options.memory)
-    addValue('--memory-swap', options.memorySwap)
-    addValue('--network', options.network)
-    addBool('--no-cache', options.noCache)
-    addBool('--no-hostname', options.noHostname)
-    addBool('--no-hosts', options.noHosts)
-    addBool('--omit-history', options.omitHistory)
-    addValue('--os', options.os)
-    addValue('--os-feature', options.osFeature)
-    addValue('--os-version', options.osVersion)
-    addValue('--pid', options.pid)
-    addValue('--platform', options.platform)
-    addValue('--pull', options.pull)
-    addBool('--quiet', options.quiet)
-    addValue('--retry', options.retry)
-    addValue('--retry-delay', options.retryDelay)
-    addBool('--rewrite-timestamp', options.rewriteTimestamp)
-    addBool('--rm', options.rm)
-    addValues('--runtime-flag', options.runtimeFlag)
-    addValue('--sbom', options.sbom)
-    addValue('--sbom-image-output', options.sbomImageOutput)
-    addValue('--sbom-image-purl-output', options.sbomImagePurlOutput)
-    addValue('--sbom-merge-strategy', options.sbomMergeStrategy)
-    addValue('--sbom-output', options.sbomOutput)
-    addValue('--sbom-purl-output', options.sbomPurlOutput)
-    addValue('--sbom-scanner-command', options.sbomScannerCommand)
-    addValue('--sbom-scanner-image', options.sbomScannerImage)
-    addValues('--secret', options.secret)
-    addValues('--security-opt', options.securityOpt)
-    addValue('--shm-size', options.shmSize)
-    addBool('--skip-unused-stages', options.skipUnusedStages)
-    addValue('--source-date-epoch', options.sourceDateEpoch)
-    addBool('--squash', options.squash)
-    addBool('--squash-all', options.squashAll)
-    addValues('--ssh', options.ssh)
-    addBool('--stdin', options.stdin)
-    addValues('--tag', options.tag)
-    addValue('--target', options.target)
-    addValue('--timestamp', options.timestamp)
-    addValues('--ulimit', options.ulimit)
-    addValues('--unsetannotation', options.unsetannotation)
-    addValues('--unsetenv', options.unsetenv)
-    addValues('--unsetlabel', options.unsetlabel)
-    addValue('--userns', options.userns)
-    addValue('--userns-gid-map', options.usernsGidMap)
-    addValue('--userns-gid-map-group', options.usernsGidMapGroup)
-    addValue('--userns-uid-map', options.usernsUidMap)
-    addValue('--userns-uid-map-user', options.usernsUidMapUser)
-    addValue('--uts', options.uts)
-    addValue('--variant', options.variant)
-    addValues('--volume', options.volume)
+    args.add(options.context ?? '.')
 
-    args.push(options.context ?? '.')
-
-    return execPodmanStreaming(args)
+    return execPodmanStreaming(args.toArgs())
 }
 
 /**
  * Pushes a container image to a specified destination.
  *
  * @param options Push options for podman push.
- * @returns The podman push exit code.
+ * @returns Resolves when the push succeeds.
  */
-export async function push(options: PodmanPushOptions): Promise<number> {
-    const args: string[] = ['push']
+export async function push(options: PodmanPushOptions): Promise<void> {
+    const args = new ArgBuilder('push')
 
-    const addValue = (flag: string, value?: string | number) => {
-        if(value === undefined) return
-        args.push(flag, String(value))
-    }
-    const addBool = (flag: string, value?: boolean) => {
-        if(value === undefined) return
-        if(value) {
-            args.push(flag)
-            return
-        }
-        args.push(`${flag}=false`)
-    }
+    args.addValue('--authfile', options.authfile)
+    args.addValue('--compression-format', options.compressionFormat)
+    args.addValue('--compression-level', options.compressionLevel)
+    args.addValue('--creds', options.creds)
+    args.addValue('--digestfile', options.digestfile)
+    args.addBool('--disable-content-trust', options.disableContentTrust)
+    args.addBool('--force-compression', options.forceCompression)
+    args.addValue('--format', options.format)
+    args.addBool('--remove-signatures', options.removeSignatures)
+    args.addValue('--retry', options.retry)
+    args.addValue('--retry-delay', options.retryDelay)
+    args.addBool('--tls-verify', options.tlsVerify)
 
-    addValue('--authfile', options.authfile)
-    addValue('--compression-format', options.compressionFormat)
-    addValue('--compression-level', options.compressionLevel)
-    addValue('--creds', options.creds)
-    addValue('--digestfile', options.digestfile)
-    addBool('--disable-content-trust', options.disableContentTrust)
-    addBool('--force-compression', options.forceCompression)
-    addValue('--format', options.format)
-    addBool('--remove-signatures', options.removeSignatures)
-    addValue('--retry', options.retry)
-    addValue('--retry-delay', options.retryDelay)
-    addBool('--tls-verify', options.tlsVerify)
-
-    args.push(options.image)
+    args.add(options.image)
     if(options.destination) {
-        args.push(options.destination)
+        args.add(options.destination)
     }
 
-    return execPodmanStreaming(args)
+    return execPodmanStreaming(args.toArgs())
 }

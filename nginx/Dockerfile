@@ -1,4 +1,5 @@
-FROM alpine:latest
+ARG ALPINE_VERSION=latest
+FROM alpine:${ALPINE_VERSION}
 ARG NGINX_VERSION
 
 RUN apk add brotli nginx~=$NGINX_VERSION nginx-mod-http-brotli nginx-mod-http-headers-more nginx-mod-http-zstd
