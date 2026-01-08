@@ -12,38 +12,44 @@ const PARSE_CONFIG = {
 async function main(values: Values, positionals: Positionals): Promise<number | void> {
     await podman.startMachine()
 
-    const mainlineVersion = '1.28.0'
-    const stableVersion = '1.28.0'
+    const mainlineVersion = '1.29.4'
+    const stableVersion = '1.28.1'
     const image = 'mpen/nginx'
 
     const builds = [
         {
             version: mainlineVersion,
             tags: [`${image}:mainline`, `${image}:latest`],
-            alpineVersion: 'edge',
+            imageId: '',
         },
         {
             version: stableVersion,
             tags: [`${image}:stable`],
-            alpineVersion: 'latest',
+            imageId: '',
         },
     ]
 
-    const allTags: string[] = []
+    const allTags = new Set<string>()
     for(const build of builds) {
-        allTags.push(`${image}:${build.version}`, ...build.tags)
-        await podman.build({
+        build.tags.unshift(`${image}:${build.version}`)
+        for(const tag of build.tags) {
+            allTags.add(tag)
+        }
+        const imageId = await podman.build({
             tag: build.tags,
-            buildArg: [
-                `ALPINE_VERSION=${build.alpineVersion}`,
-                `NGINX_VERSION=${build.version}`,
-            ],
+            buildArg: `NGINX_VERSION=${build.version}`,
             context: __dirname,
         })
+        build.imageId = imageId
     }
 
-    for(const tag of allTags) {
+    for(const tag of allTags.values()) {
         await podman.push({image: tag})
+    }
+
+    console.log()
+    for(const build of builds) {
+        console.log(`Built & pushed image ${build.imageId.slice(0,12)} w/ tags ${build.tags.map(t => `"${t}"`).join(", ")}`)
     }
 }
 

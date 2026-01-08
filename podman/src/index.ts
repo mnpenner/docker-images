@@ -1,4 +1,6 @@
 import {execFile, spawn} from 'node:child_process'
+import {createInterface} from 'node:readline'
+import type {Readable} from 'node:stream'
 import {promisify} from 'node:util'
 import {ArgBuilder} from './arg-builder.ts'
 
@@ -33,6 +35,37 @@ async function execPodmanStreaming(args: string[]): Promise<void> {
         const child = spawn('podman', args, {stdio: 'inherit'})
         child.on('error', reject)
         child.on('close', (code) => {
+            if (code && code !== 0) {
+                reject(new Error(`podman ${args[0]} exited with code ${code}`))
+                return
+            }
+            resolve()
+        })
+    })
+}
+
+async function execPodmanStreamingWithStdoutLines(
+    args: string[],
+    onLine: (line: string) => void,
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const child = spawn('podman', args, {stdio: ['ignore', 'pipe', 'pipe']})
+        const stdout = child.stdout
+        const stderr = child.stderr
+
+        stdout.on('data', (chunk) => {
+            process.stdout.write(chunk)
+        })
+        stderr.on('data', (chunk) => {
+            process.stderr.write(chunk)
+        })
+
+        const rl = createInterface({input: stdout, crlfDelay: Infinity})
+        rl.on('line', onLine)
+
+        child.on('error', reject)
+        child.on('close', (code) => {
+            rl.close()
             if (code && code !== 0) {
                 reject(new Error(`podman ${args[0]} exited with code ${code}`))
                 return
@@ -578,10 +611,155 @@ type PodmanRunOptions = {
 }
 
 /**
+ * Output handling strategy for spawned processes.
+ *
+ * @example
+ * ```ts
+ * import {ProcessOutput} from 'podman'
+ *
+ * const mode = ProcessOutput.Tee
+ * ```
+ */
+export enum ProcessOutput {
+    /** Capture output in a stream. */
+    Pipe = 'pipe',
+    /** Discard output. */
+    Ignore = 'ignore',
+    /** Forward output to the parent process. */
+    Inherit = 'inherit',
+    /** Capture output and also forward it to the parent process. */
+    Tee = 'tee',
+}
+
+/**
+ * Process output configuration for podman run.
+ *
+ * @example
+ * ```ts
+ * import {ProcessOutput} from 'podman'
+ *
+ * const options = {stdout: ProcessOutput.Tee, stderr: ProcessOutput.Pipe}
+ * ```
+ */
+export type ProcessOptions = {
+    /** How stdout is handled. Defaults to [`ProcessOutput.Inherit`]{@link ProcessOutput.Inherit}. */
+    stdout?: ProcessOutput
+    /** How stderr is handled. Defaults to [`ProcessOutput.Inherit`]{@link ProcessOutput.Inherit}. */
+    stderr?: ProcessOutput
+}
+
+/**
+ * Handle returned by [`run`]{@link run} to control the podman process.
+ *
+ * @example
+ * ```ts
+ * import {run, ProcessOutput} from 'podman'
+ *
+ * const proc = run(
+ *     {image: 'alpine:latest', command: 'echo', commandArgs: ['hello']},
+ *     {stdout: ProcessOutput.Tee},
+ * )
+ * await proc.waitThrow()
+ * ```
+ */
+export type PodmanRunHandle = {
+    /**
+     * Sends SIGKILL to the podman process.
+     *
+     * @returns True if the signal was sent, false otherwise.
+     *
+     * @example
+     * ```ts
+     * import {run} from 'podman'
+     *
+     * const proc = await run({image: 'alpine:latest', command: 'sleep', commandArgs: ['60']})
+     * proc.kill()
+     * ```
+     */
+    kill: () => boolean
+    /**
+     * Sends SIGTERM to the podman process.
+     *
+     * @returns True if the signal was sent, false otherwise.
+     *
+     * @example
+     * ```ts
+     * import {run} from 'podman'
+     *
+     * const proc = await run({image: 'alpine:latest', command: 'sleep', commandArgs: ['60']})
+     * proc.term()
+     * ```
+     */
+    term: () => boolean
+    /**
+     * Waits for the podman process to exit.
+     *
+     * @returns Resolves with the exit code of the podman process.
+     *
+     * @example
+     * ```ts
+     * import {run} from 'podman'
+     *
+     * const proc = await run({image: 'alpine:latest', command: 'true'})
+     * const code = await proc.wait()
+     * console.log(code)
+     * ```
+     */
+    wait: () => Promise<number>
+    /**
+     * Waits for the podman process to exit and rejects on non-zero exit codes.
+     *
+     * @returns Resolves with the exit code when it is zero.
+     *
+     * @example
+     * ```ts
+     * import {run} from 'podman'
+     *
+     * const proc = await run({image: 'alpine:latest', command: 'false'})
+     * await proc.waitThrow()
+     * ```
+     */
+    waitThrow: () => Promise<number>
+    /** Stdout stream when configured with [`ProcessOutput.Pipe`]{@link ProcessOutput.Pipe} or [`ProcessOutput.Tee`]{@link ProcessOutput.Tee}. */
+    stdout: Readable | null
+    /** Stderr stream when configured with [`ProcessOutput.Pipe`]{@link ProcessOutput.Pipe} or [`ProcessOutput.Tee`]{@link ProcessOutput.Tee}. */
+    stderr: Readable | null
+}
+
+type ProcessOutputConfig = {
+    stdio: 'pipe' | 'ignore' | 'inherit'
+    tee: boolean
+}
+
+function resolveProcessOutput(mode: ProcessOutput | undefined): ProcessOutputConfig {
+    switch (mode) {
+        case ProcessOutput.Pipe:
+            return {stdio: 'pipe', tee: false}
+        case ProcessOutput.Ignore:
+            return {stdio: 'ignore', tee: false}
+        case ProcessOutput.Tee:
+            return {stdio: 'pipe', tee: true}
+        case ProcessOutput.Inherit:
+        default:
+            return {stdio: 'inherit', tee: false}
+    }
+}
+
+/**
  * Ensures the Podman machine is running.
  *
  * @param machineName Name of the Podman machine to start.
- * @returns True when a machine start was triggered, false if it's already running.
+ * @returns Resolves to true when a machine start was triggered, or false if it is already running.
+ *
+ * @example
+ * ```ts
+ * import {startMachine} from 'podman'
+ *
+ * const started = await startMachine()
+ * if (started) {
+ *     console.log('Podman machine booted.')
+ * }
+ * ```
  */
 export async function startMachine(machineName = 'podman-machine-default'): Promise<boolean> {
     const out = await execPodman(['machine', 'list', '--format', 'json'])
@@ -600,10 +778,29 @@ export async function startMachine(machineName = 'podman-machine-default'): Prom
 /**
  * Builds a container image using podman build.
  *
+ * Use [`startMachine`]{@link startMachine} first when running against a Podman VM.
+ *
  * @param options Build options for podman build.
- * @returns Resolves when the build succeeds.
+ * @returns Resolves with the built image ID (sha256 hash).
+ *
+ * @example
+ * ```ts
+ * import {build} from 'podman'
+ *
+ * const imageId = await build({context: '.', tag: 'my-app:latest'})
+ * console.log(imageId)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import {startMachine, build} from 'podman'
+ *
+ * await startMachine()
+ * const imageId = await build({file: './Containerfile', tag: 'my-app:dev'})
+ * console.log(imageId)
+ * ```
  */
-export async function build(options: PodmanBuildOptions = {}): Promise<void> {
+export async function build(options: PodmanBuildOptions = {}): Promise<string> {
     const args = new ArgBuilder('build')
 
     args.addValues('--add-host', options.addHost)
@@ -712,7 +909,17 @@ export async function build(options: PodmanBuildOptions = {}): Promise<void> {
 
     args.add(options.context ?? '.')
 
-    return execPodmanStreaming(args.toArgs())
+    let imageId: string | undefined
+    await execPodmanStreamingWithStdoutLines(args.toArgs(), (line) => {
+        const trimmed = line.trim()
+        if (/^[a-f0-9]{64}$/.test(trimmed)) {
+            imageId = trimmed
+        }
+    })
+    if (!imageId) {
+        throw new Error('Unable to determine built image ID from podman output.')
+    }
+    return imageId
 }
 
 /**
@@ -720,6 +927,13 @@ export async function build(options: PodmanBuildOptions = {}): Promise<void> {
  *
  * @param options Push options for podman push.
  * @returns Resolves when the push succeeds.
+ *
+ * @example
+ * ```ts
+ * import {push} from 'podman'
+ *
+ * await push({image: 'my-app:latest', destination: 'docker://registry.example.com/my-app:latest'})
+ * ```
  */
 export async function push(options: PodmanPushOptions): Promise<void> {
     const args = new ArgBuilder('push')
@@ -749,9 +963,33 @@ export async function push(options: PodmanPushOptions): Promise<void> {
  * Runs a command in a new container.
  *
  * @param options Run options for podman run.
- * @returns Resolves when the container exits successfully.
+ * @param processOptions Output handling for the spawned podman process.
+ * @returns Handle for controlling the running podman process.
+ *
+ * @example
+ * ```ts
+ * import {run} from 'podman'
+ *
+ * const proc = run({image: 'alpine:latest', command: 'echo', commandArgs: ['hello from podman']})
+ * await proc.waitThrow()
+ * ```
+ *
+ * @example
+ * ```ts
+ * import {run, ProcessOutput} from 'podman'
+ *
+ * const proc = run(
+ *     {image: 'alpine:latest', command: 'sh', commandArgs: ['-c', 'echo hello; echo err 1>&2']},
+ *     {stdout: ProcessOutput.Tee, stderr: ProcessOutput.Pipe},
+ * )
+ * const code = await proc.wait()
+ * console.log(code, proc.stderr)
+ * ```
  */
-export async function run(options: PodmanRunOptions): Promise<void> {
+export function run(
+    options: PodmanRunOptions,
+    processOptions: ProcessOptions = {},
+): PodmanRunHandle {
     const args = new ArgBuilder('run')
 
     args.addValues('--add-host', options.addHost)
@@ -911,5 +1149,45 @@ export async function run(options: PodmanRunOptions): Promise<void> {
         }
     }
 
-    return execPodmanStreaming(args.toArgs())
+    const stdoutConfig = resolveProcessOutput(processOptions.stdout)
+    const stderrConfig = resolveProcessOutput(processOptions.stderr)
+    const child = spawn('podman', args.toArgs(), {
+        stdio: ['inherit', stdoutConfig.stdio, stderrConfig.stdio],
+    })
+
+    const stdout = child.stdout ?? null
+    const stderr = child.stderr ?? null
+
+    if (stdout && stdoutConfig.tee) {
+        stdout.on('data', (chunk) => {
+            process.stdout.write(chunk)
+        })
+    }
+    if (stderr && stderrConfig.tee) {
+        stderr.on('data', (chunk) => {
+            process.stderr.write(chunk)
+        })
+    }
+
+    const exitPromise = new Promise<number>((resolve, reject) => {
+        child.on('error', reject)
+        child.on('close', (code) => {
+            resolve(code ?? 1)
+        })
+    })
+
+    return {
+        kill: () => child.kill('SIGKILL'),
+        term: () => child.kill('SIGTERM'),
+        wait: () => exitPromise,
+        waitThrow: async () => {
+            const code = await exitPromise
+            if (code !== 0) {
+                throw new Error(`podman run exited with code ${code}`)
+            }
+            return code
+        },
+        stdout,
+        stderr,
+    }
 }

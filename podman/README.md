@@ -17,7 +17,7 @@ import {build, push, startMachine} from 'podman'
 await startMachine()  // podman-machine-default
 await startMachine('your-machine-name')
 
-await build({
+const imageId = await build({
   context: '.',
   file: 'Containerfile',
   tag: 'example:latest',
