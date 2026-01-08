@@ -17,7 +17,7 @@ const PARSE_CONFIG = {
 } satisfies ParseArgsConfig
 
 async function main(values: Values, positionals: Positionals): Promise<number | void> {
-    console.log(await startMachine())
+    console.log(await startMachine('foo'))
 }
 
 

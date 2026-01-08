@@ -1,15 +1,19 @@
 # podman
 
-To install dependencies:
+Minimal helper to start a Podman machine from Bun or Node.
 
-```bash
-bun install
+## Install
+
+```sh
+bun add podman
+npm i podman
 ```
 
-To run:
+## Usage
 
-```bash
-bun run index.ts
+```ts
+import {startMachine} from 'podman'
+
+await startMachine()  // podman-machine-default
+await startMachine('your-machine-name')
 ```
-
-This project was created using `bun init` in bun v1.3.5. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.

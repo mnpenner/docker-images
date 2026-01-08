@@ -1,4 +1,5 @@
-.idea
-.hg
+.idea/
+.hg/
 *.bak
 .hgignore
+dist/
