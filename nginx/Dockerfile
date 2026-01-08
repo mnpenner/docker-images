@@ -1,9 +1,21 @@
-FROM mpen/build-essentials as build
+FROM debian:bookworm-slim as build
 ARG NGINX_VERSION=1.29.4
 ARG HEADERS_MORE_VERSION=0.38
 ARG ZSTD_MODULE_REF=master
 
-RUN install_packages libpcre2-dev zlib1g-dev libssl-dev libzstd-dev
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+        git \
+        libpcre2-dev \
+        libssl-dev \
+        libzstd-dev \
+        pkg-config \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
 RUN curl -fsSL "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" \
@@ -61,7 +73,9 @@ RUN cd nginx && ./configure \
         --with-stream_ssl_preread_module \
         --add-module=/build/headers-more-nginx-module \
         --add-module=/build/ngx_brotli \
-        --add-module=/build/zstd-nginx-module
+        --add-module=/build/zstd-nginx-module \
+        --with-cc-opt="-static" \
+        --with-ld-opt="-static"
 
 RUN cd nginx && make -j"$(nproc)" && make install \
     && rm -rf /etc/nginx/html /etc/nginx/*.default /etc/nginx/koi-* /etc/nginx/win-utf
@@ -92,17 +106,9 @@ RUN mkdir -p /dist/etc /dist/usr/sbin /dist/srv /dist/var/spool /dist/var \
     && cp -a /srv/www /dist/srv/ \
     && cp -a /var/spool/nginx /dist/var/spool/ \
     && cp -a /var/run /dist/var/ \
-    && cp -a /etc/passwd /etc/group /dist/etc/ \
-    && if [ -e /lib/x86_64-linux-gnu/libcrypt.so.1 ]; then cp --parents /lib/x86_64-linux-gnu/libcrypt.so.1 /dist; fi \
-    && if [ -e /lib/x86_64-linux-gnu/libpcre2-8.so.0 ]; then cp --parents /lib/x86_64-linux-gnu/libpcre2-8.so.0 /dist; fi \
-    && if [ -e /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0 ]; then cp --parents /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0 /dist; fi \
-    && if [ -e /lib/x86_64-linux-gnu/libz.so.1 ]; then cp --parents /lib/x86_64-linux-gnu/libz.so.1 /dist; fi \
-    && if [ -e /usr/lib/x86_64-linux-gnu/libz.so.1 ]; then cp --parents /usr/lib/x86_64-linux-gnu/libz.so.1 /dist; fi \
-    && ldd /usr/sbin/nginx \
-        | awk '$3 ~ /^\\// { print $3 }' \
-        | xargs -I '{}' cp --parents '{}' /dist
+    && cp -a /etc/passwd /etc/group /dist/etc/
 
-FROM gcr.io/distroless/cc-debian12
+FROM gcr.io/distroless/static-debian12
 COPY --from=runtime-prep /dist/ /
 
 EXPOSE 80
