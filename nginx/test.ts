@@ -14,14 +14,16 @@ async function main(values: Values, positionals: Positionals): Promise<number | 
 
     const handle = podman.run({
         rm: true,
-        image: 'mpen/nginx:mainline',
+        image: 'mpen/nginx:stable',
         interactive: true,
         tty: true,
         publish: '3001:80',
     })
 
 
-    await handle.waitThrow()
+    const exitCode = await handle.waitThrow()
+
+    console.log(`Exited with code ${exitCode}`)
 }
 
 

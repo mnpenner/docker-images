@@ -15,6 +15,7 @@ async function main(values: Values, positionals: Positionals): Promise<number | 
     const mainlineVersion = '1.29.4'
     const stableVersion = '1.28.1'
     const image = 'mpen/nginx'
+    const testPort = 3001
 
     const builds = [
         {
@@ -35,22 +36,67 @@ async function main(values: Values, positionals: Positionals): Promise<number | 
         for(const tag of build.tags) {
             allTags.add(tag)
         }
-        const imageId = await podman.build({
+        build.imageId = await podman.build({
             tag: build.tags,
             buildArg: `NGINX_VERSION=${build.version}`,
             context: __dirname,
         })
-        build.imageId = imageId
+
+        console.log(`\nBuilt image ${build.imageId.slice(0,12)} w/ tags ${build.tags.map(t => `"${t}"`).join(", ")}`)
+
+        console.log(`Running on port ${testPort} to verify image...`)
+        const handle = podman.run({
+            rm: true,
+            image: build.imageId,
+            interactive: true,
+            tty: true,
+            publish: `${testPort}:80`,
+        })
+
+        try {
+            await assertNginxHealthy(testPort)
+            console.log('Nginx is healthy!')
+        } finally {
+            handle.term()
+            await handle.wait()
+        }
+
+        console.log()
     }
 
     for(const tag of allTags.values()) {
         await podman.push({image: tag})
+        console.log(`\nPushed image ${tag}\n`)
+    }
+}
+
+async function assertNginxHealthy(port: number): Promise<void> {
+    const url = `http://127.0.0.1:${port}/`
+    const maxAttempts = 8
+    const delayMs = 250
+
+    let lastError: Error | null = null
+
+    for(let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            const response = await fetch(url)
+            const body = await response.text()
+            if(response.status !== 200) {
+                throw new Error(`Expected status 200, received ${response.status}`)
+            }
+            if(!body.includes('Welcome to NginX')) {
+                throw new Error('Expected response to include "Welcome to NginX"')
+            }
+            return
+        } catch (err) {
+            lastError = err instanceof Error ? err : new Error(String(err))
+            if(attempt < maxAttempts) {
+                await new Promise((resolve) => setTimeout(resolve, delayMs))
+            }
+        }
     }
 
-    console.log()
-    for(const build of builds) {
-        console.log(`Built & pushed image ${build.imageId.slice(0,12)} w/ tags ${build.tags.map(t => `"${t}"`).join(", ")}`)
-    }
+    throw lastError ?? new Error('Failed to verify nginx response')
 }
 
 
