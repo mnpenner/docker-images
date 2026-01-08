@@ -1,4 +1,4 @@
-import {execFile} from 'node:child_process'
+import {execFile, spawn} from 'node:child_process'
 import {promisify} from 'node:util'
 
 const execFileAsync = promisify(execFile)
@@ -25,6 +25,16 @@ type PodmanMachine = {
 async function execPodman(args: string[]): Promise<string> {
     const {stdout} = await execFileAsync('podman', args)
     return stdout
+}
+
+async function execPodmanStreaming(args: string[]): Promise<number> {
+    return new Promise((resolve, reject) => {
+        const child = spawn('podman', args, {stdio: 'inherit'})
+        child.on('error', reject)
+        child.on('close', (code) => {
+            resolve(code ?? 0)
+        })
+    })
 }
 
 type PodmanBuildOptions = {
@@ -262,9 +272,9 @@ export async function startMachine(machineName = 'podman-machine-default'): Prom
  * Builds a container image using podman build.
  *
  * @param options Build options for podman build.
- * @returns The podman build command output.
+ * @returns The podman build exit code.
  */
-export async function build(options: PodmanBuildOptions = {}): Promise<string> {
+export async function build(options: PodmanBuildOptions = {}): Promise<number> {
     const args: string[] = ['build']
 
     const addValue = (flag: string, value?: string | number) => {
@@ -394,5 +404,5 @@ export async function build(options: PodmanBuildOptions = {}): Promise<string> {
 
     args.push(options.context ?? '.')
 
-    return execPodman(args)
+    return execPodmanStreaming(args)
 }

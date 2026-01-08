@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 import { rmSync } from 'node:fs'
 
-const outdir = './dist'
+const outdir = `${__dirname}/dist`
 
 rmSync(outdir, { recursive: true, force: true })
 
 await Bun.build({
-  entrypoints: ['./src/index.ts'],
+  entrypoints: [`${__dirname}/src/index.ts`],
   outdir: outdir,
   target: 'bun',
   format: 'esm',
