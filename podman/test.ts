@@ -1,5 +1,5 @@
 #!/usr/bin/env -S bun -i
-import {startMachine} from './index.ts'
+import {startMachine} from './src'
 import {parseArgs, type ParseArgsConfig} from "node:util"
 
 const PARSE_CONFIG = {

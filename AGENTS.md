@@ -1,0 +1,4 @@
+- Add detailed JSDoc comments including @example blocks, @param and @returns to all public APIs, including all function overloads
+  - The public API is the `entry` point shown in `tsdown.config.ts` 
+  - Link to other functions and classes using this syntax: [`ExampleClass`]{@link ExampleClass} 
+  - Link to methods using this syntax: [`Err.valueOr`]{@link Err#valueOr} 
