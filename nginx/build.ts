@@ -13,11 +13,17 @@ async function main(values: Values, positionals: Positionals): Promise<number | 
     await podman.startMachine()
 
     const mainlineVersion = '1.29.4'
-    const stableVersion = '1.28.1'
+    const stableVersion = '1.28.0'
     const image = 'mpen/nginx'
 
     await podman.build({
-        tag: `${image}:${stableVersion}`,
+        tag: [`${image}:${stableVersion}`, `${image}:mainline`, `${image}:latest`],
+        buildArg: `NGINX_VERSION=${stableVersion}`,
+        context: __dirname,
+    })
+
+    await podman.build({
+        tag: [`${image}:${stableVersion}`, `${image}:stable`],
         buildArg: `NGINX_VERSION=${stableVersion}`,
         context: __dirname,
     })

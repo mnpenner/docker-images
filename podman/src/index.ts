@@ -248,6 +248,37 @@ type PodmanBuildOptions = {
     volume?: string | string[]
 }
 
+type PodmanPushOptions = {
+    /** Source image to push. */
+    image: string
+    /** Destination to push the image to. */
+    destination?: string
+    /** Path of the authentication file. */
+    authfile?: string
+    /** Compression format to use. */
+    compressionFormat?: string
+    /** Compression level to use. */
+    compressionLevel?: number
+    /** Credentials (USERNAME:PASSWORD) to use for authenticating to a registry. */
+    creds?: string
+    /** Write the digest of the pushed image to the specified file. */
+    digestfile?: string
+    /** This is a Docker specific option and is a NOOP. */
+    disableContentTrust?: boolean
+    /** Use the specified compression algorithm even if the destination contains a differently-compressed variant already. */
+    forceCompression?: boolean
+    /** Manifest type (oci, v2s2, or v2s1) to use in the destination. */
+    format?: string
+    /** Discard any pre-existing signatures in the image. */
+    removeSignatures?: boolean
+    /** Number of times to retry in case of failure when performing push. */
+    retry?: number
+    /** Delay between retries in case of push failures. */
+    retryDelay?: string
+    /** Require HTTPS and verify certificates when contacting registries. */
+    tlsVerify?: boolean
+}
+
 /**
  * Ensures the Podman machine is running.
  *
@@ -278,22 +309,22 @@ export async function build(options: PodmanBuildOptions = {}): Promise<number> {
     const args: string[] = ['build']
 
     const addValue = (flag: string, value?: string | number) => {
-        if (value === undefined) return
+        if(value === undefined) return
         args.push(flag, String(value))
     }
     const addBool = (flag: string, value?: boolean) => {
-        if (value === undefined) return
-        if (value) {
+        if(value === undefined) return
+        if(value) {
             args.push(flag)
             return
         }
         args.push(`${flag}=false`)
     }
     const addValues = (flag: string, values?: string | string[]) => {
-        if (!values) return
+        if(!values) return
         const list = Array.isArray(values) ? values : [values]
-        if (!list.length) return
-        for (const value of list) {
+        if(!list.length) return
+        for(const value of list) {
             args.push(flag, value)
         }
     }
@@ -403,6 +434,49 @@ export async function build(options: PodmanBuildOptions = {}): Promise<number> {
     addValues('--volume', options.volume)
 
     args.push(options.context ?? '.')
+
+    return execPodmanStreaming(args)
+}
+
+/**
+ * Pushes a container image to a specified destination.
+ *
+ * @param options Push options for podman push.
+ * @returns The podman push exit code.
+ */
+export async function push(options: PodmanPushOptions): Promise<number> {
+    const args: string[] = ['push']
+
+    const addValue = (flag: string, value?: string | number) => {
+        if(value === undefined) return
+        args.push(flag, String(value))
+    }
+    const addBool = (flag: string, value?: boolean) => {
+        if(value === undefined) return
+        if(value) {
+            args.push(flag)
+            return
+        }
+        args.push(`${flag}=false`)
+    }
+
+    addValue('--authfile', options.authfile)
+    addValue('--compression-format', options.compressionFormat)
+    addValue('--compression-level', options.compressionLevel)
+    addValue('--creds', options.creds)
+    addValue('--digestfile', options.digestfile)
+    addBool('--disable-content-trust', options.disableContentTrust)
+    addBool('--force-compression', options.forceCompression)
+    addValue('--format', options.format)
+    addBool('--remove-signatures', options.removeSignatures)
+    addValue('--retry', options.retry)
+    addValue('--retry-delay', options.retryDelay)
+    addBool('--tls-verify', options.tlsVerify)
+
+    args.push(options.image)
+    if(options.destination) {
+        args.push(options.destination)
+    }
 
     return execPodmanStreaming(args)
 }
