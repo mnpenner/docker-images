@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bun -i
-import {startMachine} from './src'
 import {parseArgs, type ParseArgsConfig} from "node:util"
+import {startMachine} from './src'
 
 const PARSE_CONFIG = {
     args: process.argv,

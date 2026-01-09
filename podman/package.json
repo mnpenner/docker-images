@@ -1,6 +1,6 @@
 {
     "name": "podman",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "Utilities for starting a Podman machine from Bun/Node.",
     "author": "Mark Penner <npm@mpen.ca>",
     "module": "index.ts",
@@ -12,8 +12,7 @@
         "./package.json": "./package.json"
     },
     "files": [
-        "index.ts",
-        "README.md"
+        "dist"
     ],
     "sideEffects": false,
     "license": "MIT",
