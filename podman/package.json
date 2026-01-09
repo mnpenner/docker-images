@@ -1,6 +1,6 @@
 {
     "name": "podman",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "description": "Utilities for starting a Podman machine from Bun/Node.",
     "author": "Mark Penner <npm@mpen.ca>",
     "module": "index.ts",

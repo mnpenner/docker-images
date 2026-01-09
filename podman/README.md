@@ -12,18 +12,18 @@ npm i podman
 ## Usage
 
 ```ts
-import {build, push, startMachine} from 'podman'
+import * as podman from 'podman'
 
-await startMachine()  // podman-machine-default
-await startMachine('your-machine-name')
+await podman.startMachine()  // podman-machine-default
+await podman.startMachine('your-machine-name')
 
-const imageId = await build({
+const imageId = await podman.build({
   context: '.',
   file: 'Containerfile',
   tag: 'example:latest',
 })
 
-await push({
+await podman.push({
   image: 'example:latest',
   destination: 'docker://registry.example.com/repository:tag',
   creds: 'username:password',
