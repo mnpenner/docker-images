@@ -11,7 +11,7 @@ import {Readable, Writable} from 'node:stream'
  * import {Process, StreamIn, StreamOut} from 'podman'
  *
  * const proc = Process.spawn(['echo', 'hi'], {
- *     stdin: StreamIn.CLOSE,
+ *     stdin: StreamIn.EMPTY,
  *     stdout: StreamOut.TEE,
  *     stderr: StreamOut.PIPE,
  * })
@@ -67,7 +67,7 @@ type StreamOutConfig = {
  * import {Process, StreamIn, StreamOut} from 'podman'
  *
  * const proc = Process.spawn(['echo', 'hello'], {
- *     stdin: StreamIn.CLOSE,
+ *     stdin: StreamIn.EMPTY,
  *     stdout: StreamOut.TEE,
  *     stderr: StreamOut.PIPE,
  * })
@@ -110,11 +110,11 @@ export class Process extends (EventEmitter as new () => TypedEventEmitter<Events
      * ```ts
      * import {Process, StreamIn, StreamOut} from 'podman'
      *
-     * const proc = Process.spawn(['podman', '--version'], {
-     *     stdin: StreamIn.CLOSE,
-     *     stdout: StreamOut.PIPE,
-     *     stderr: StreamOut.TEE,
-     * })
+ * const proc = Process.spawn(['podman', '--version'], {
+ *     stdin: StreamIn.EMPTY,
+ *     stdout: StreamOut.PIPE,
+ *     stderr: StreamOut.TEE,
+ * })
      * const code = await proc.wait()
      * console.log('exit code:', code)
      * ```
@@ -293,11 +293,6 @@ export const enum StreamIn {
      */
     EMPTY,
     /**
-     * Close the child's stdin immediately (fd closed).
-     * Writes to stdin will be silently discarded.
-     */
-    CLOSE,
-    /**
      * Child reads from the parent process's stdin.
      * Writes to stdin will be silently discarded.
      */
@@ -335,8 +330,6 @@ function resolveStreamIn(mode: StreamIn | undefined): StreamInConfig {
     switch(mode ?? StreamIn.INHERIT) {
         case StreamIn.EMPTY:
             return {stdio: 'ignore', closeAfterSpawn: false}
-        case StreamIn.CLOSE:
-            return {stdio: 'pipe', closeAfterSpawn: true}
         case StreamIn.INHERIT:
             return {stdio: 'inherit', closeAfterSpawn: false}
         case StreamIn.PIPE:
