@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bun -i
 import {parseArgs, type ParseArgsConfig} from "node:util"
-import {startMachine} from './src'
+import {forceStartMachine} from './src'
 
 const PARSE_CONFIG = {
     args: process.argv,
@@ -17,7 +17,7 @@ const PARSE_CONFIG = {
 } satisfies ParseArgsConfig
 
 async function main(values: Values, positionals: Positionals): Promise<number | void> {
-    console.log(await startMachine('foo'))
+    console.log(await forceStartMachine('foo'))
 }
 
 

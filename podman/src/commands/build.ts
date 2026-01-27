@@ -215,7 +215,8 @@ type PodmanBuildOptions = {
 /**
  * Builds a container image using podman build.
  *
- * Use [`startMachine`]{@link startMachine} first when running against a Podman VM.
+ * Use [`forceStartMachine`]{@link forceStartMachine} (or [`isMachineRunning`]{@link isMachineRunning} + [`startMachine`]{@link startMachine})
+ * first when running against a Podman VM.
  *
  * @param options Build options for podman build.
  * @returns Resolves with the built image ID (sha256 hash).
@@ -230,9 +231,9 @@ type PodmanBuildOptions = {
  *
  * @example
  * ```ts
- * import {startMachine, build} from 'podman'
+ * import {forceStartMachine, build} from 'podman'
  *
- * await startMachine()
+ * await forceStartMachine()
  * const imageId = await build({file: './Containerfile', tag: 'my-app:dev'})
  * console.log(imageId)
  * ```

@@ -108,7 +108,7 @@ RUN mkdir -p /dist/etc /dist/usr/sbin /dist/srv /dist/var/spool /dist/var \
     && cp -a /var/run /dist/var/ \
     && cp -a /etc/passwd /etc/group /dist/etc/
 
-FROM gcr.io/distroless/base-debian12
+FROM alpine:3
 COPY --from=runtime-prep /dist/ /
 
 EXPOSE 80

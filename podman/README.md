@@ -14,8 +14,11 @@ npm i podman
 ```ts
 import * as podman from 'podman'
 
-await podman.startMachine()  // podman-machine-default
-await podman.startMachine('your-machine-name')
+await podman.forceStartMachine()  // podman-machine-default
+await podman.forceStartMachine('your-machine-name')
+
+const machines = await podman.listMachines()
+console.log(machines.map((machine) => machine.Name))
 
 const imageId = await podman.build({
   context: '.',
