@@ -25,7 +25,7 @@ export type ProcessSpawnOptions = {
     stdout?: StreamOut
     /** How the child process writes stderr. Defaults to [`StreamOut.INHERIT`]{@link StreamOut.INHERIT}. */
     stderr?: StreamOut
-    /** Environment variables to merge with the current process environment. */
+    /** Environment variables to use for the child process (replaces the current process environment). */
     env?: Record<string, string>
     /** User ID to run the process as. */
     uid?: number
@@ -128,7 +128,7 @@ export class Process extends (EventEmitter as new () => TypedEventEmitter<Events
 
         const child = spawn(command, args, {
             stdio: [stdinConfig.stdio, stdoutConfig.stdio, stderrConfig.stdio],
-            env: options.env ? {...process.env, ...options.env} : process.env,
+            env: options.env ?? process.env,
             uid: options.uid,
             gid: options.gid,
             cwd: options.cwd,
@@ -250,7 +250,7 @@ export class Process extends (EventEmitter as new () => TypedEventEmitter<Events
      * timeout period.
      *
      * @param timeoutMs Milliseconds to wait before sending SIGKILL.
-     * @returns Exit code of the process when it is zero.
+     * @returns Resolves when the process exits with code 0.
      *
      * @example
      * ```ts
@@ -268,12 +268,11 @@ export class Process extends (EventEmitter as new () => TypedEventEmitter<Events
      * await proc.waitOrThrow(500)
      * ```
      */
-    async waitOrThrow(timeoutMs?: number): Promise<number> {
+    async waitOrThrow(timeoutMs?: number): Promise<void> {
         const code = await this.wait(timeoutMs)
         if(code !== 0) {
             throw new Error(`process exited with code ${code}`)
         }
-        return code
     }
 }
 
