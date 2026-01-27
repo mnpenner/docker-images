@@ -1,6 +1,9 @@
 import {spawn, type ChildProcess} from 'node:child_process'
+import type {TypedEventEmitter} from './typed-event-emitter.ts'
+import { EventEmitter } from "node:events";
+import {Readable,Writable} from 'node:stream'
 
-interface SpawnOptions {
+interface ProcessSpawnOptions {
     stdin?: StreamIn
     stdout?: StreamOut
     stderr?: StreamOut
@@ -12,12 +15,38 @@ interface SpawnOptions {
 
 type OneOrMore<T> = [T, ...T[]];
 
+type Events = {
+    /**
+     * Data from either stdout or stderr.
+     */
+    data: (chunk: Buffer, fd: 1|2) => void,
+}
 
-class Process {
+const DEV_NULL = new Writable({
+    write(_c, _e, cb) { cb(); },
+});
+
+
+class Process extends (EventEmitter as new () => TypedEventEmitter<Events>) {
     private readonly _child: ChildProcess
+    public readonly stdin: Writable
+    public readonly stdout: Readable
+    public readonly stderr: Readable
+
+    private constructor(proc: ChildProcess) {
+        super()
+        this._child = proc
+        this.stdout = proc.stdout ?? Readable.from([]);
+        this.stderr = proc.stderr ?? Readable.from([]);
+        this.stdin = proc.stdin ?? DEV_NULL
+    }
 
 
-    static spawn(cmd: OneOrMore<string>, options: SpawnOptions) {
+    static spawn(cmd: OneOrMore<string>, options: ProcessSpawnOptions) {
+        const [command, ...args] = cmd
+
+        // TODO: convert options to node options
+        return new Process(spawn(command, args, {/*TODO*/}))
 
     }
 
@@ -25,6 +54,7 @@ class Process {
      * Send SIGKILL signal to the process.
      */
     kill(): this {
+        // TODO
     }
 
     /**
@@ -34,6 +64,7 @@ class Process {
      * timeout period.
      */
     term(timeout?: number): this {
+        // TODO
     }
 
     /**
@@ -45,6 +76,7 @@ class Process {
      * @returns Exit code of the process.
      */
     wait(timeout?: number): Promise<number> {
+        // TODO
     }
 
     /**
@@ -53,33 +85,42 @@ class Process {
      * If a timeout is provided, the process will be forcefully killed if it has not gracefully exited within the
      * timeout period.
      */
-    waitOrThrow(timeout?: number): Promise<void | Error> {
+    waitOrThrow(timeout?: number): Promise<void> {
+        // TODO
     }
 }
 
 export const enum StreamIn {
-    /** Attach the input stream to /dev/null. The parent process cannot write to it. */
-    DISCARD,
-    /** Immediately close the input stream. */
+    /**
+     * Provide empty input (child sees EOF immediately).
+     * Writes to stdin will be silently discarded.
+     */
+    EMPTY,
+    /**
+     * Close the child's stdin immediately (fd closed).
+     * Writes to stdin will be silently discarded.
+     */
     CLOSE,
-    /** Attach the input stream to the parent process's stdin */
+    /**
+     * Child reads from the parent process's stdin.
+     * Writes to stdin will be silently discarded.
+     */
     INHERIT,
-    /** Allow you to attach your own input stream */
+    /**
+     * Expose a writable so the parent can write to the child's stdin.
+     */
     PIPE,
-
 }
 
-
 export const enum StreamOut {
-    /** Discard output by sending it to /dev/null */
+    /** Drain and discard all output. */
     DISCARD,
-    /** Immediately close the stream. */
+    /** Close the child's stdout/stderr immediately (child writes may fail). */
     CLOSE,
-    /** Forward output to the parent process. */
+    /** Child writes to the parent process's stdout/stderr. */
     INHERIT,
-    /** Capture output in a stream. */
+    /** Expose a readable so the parent can consume the child's output. */
     PIPE,
-    /** Capture output and also forward it to the parent process. */
+    /** Forward to parent and also expose a readable copy. */
     TEE,
-
 }
