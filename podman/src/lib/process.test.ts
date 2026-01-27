@@ -19,6 +19,21 @@ async function readStream(stream: Readable): Promise<string> {
     })
 }
 
+async function readStdinLink(mode: StreamIn): Promise<string> {
+    const proc = Process.spawn([
+        SHELL,
+        '-c',
+        'if [ -e /proc/self/fd/0 ]; then readlink /proc/self/fd/0; else echo "no-proc"; fi',
+    ], {
+        stdin: mode,
+        stdout: StreamOut.PIPE,
+    })
+
+    const output = await readStream(proc.stdout)
+    await proc.wait()
+    return output.trim()
+}
+
 describe('Process', () => {
     test('spawns and captures stdout/stderr with data events', async () => {
         const proc = Process.spawn([SHELL, '-c', 'echo out; echo err 1>&2'], {
@@ -92,6 +107,22 @@ describe('Process', () => {
         expect(code).toBe(0)
         expect(sawError).toBe(false)
         expect(output.trim()).toBe('eof')
+    })
+
+    test('StreamIn.EMPTY keeps stdin open as /dev/null', async () => {
+        const link = await readStdinLink(StreamIn.EMPTY)
+        if(link === 'no-proc') {
+            return
+        }
+        expect(link).toBe('/dev/null')
+    })
+
+    test('StreamIn.CLOSE closes the write end of the stdin pipe', async () => {
+        const link = await readStdinLink(StreamIn.CLOSE)
+        if(link === 'no-proc') {
+            return
+        }
+        expect(link.startsWith('pipe:')).toBe(true)
     })
 
     test('StreamIn.CLOSE ends stdin immediately', async () => {
