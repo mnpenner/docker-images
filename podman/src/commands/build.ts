@@ -1,5 +1,5 @@
 import {ArgBuilder} from '../lib/arg-builder.ts'
-import {execPodmanStreamingWithStdoutLines} from '../lib/spawn.ts'
+import {execPodmanStreamingWithStdoutLines} from '../lib/podman-spawn.ts'
 
 type PodmanBuildOptions = {
     /** Build context directory. */

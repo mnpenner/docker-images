@@ -1,4 +1,4 @@
-import {execPodman} from '../lib/spawn.ts'
+import {execPodman} from '../lib/podman-spawn.ts'
 
 type PodmanMachine = {
     Name: string

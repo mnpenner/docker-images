@@ -1,5 +1,5 @@
 import {ArgBuilder} from '../lib/arg-builder.ts'
-import {execPodmanStreaming} from '../lib/spawn.ts'
+import {execPodmanStreaming} from '../lib/podman-spawn.ts'
 
 type PodmanPushOptions = {
     /** Source image to push. */
