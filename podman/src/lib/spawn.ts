@@ -1,7 +1,6 @@
 import {promisify} from 'node:util'
 import {execFile, spawn} from 'node:child_process'
 import {createInterface} from 'node:readline'
-import type {Readable} from 'node:stream'
 
 const execFileAsync = promisify(execFile)
 
@@ -107,83 +106,6 @@ export function resolveProcessOutput(mode: ProcessOutput | undefined): ProcessOu
     }
 }
 
-/**
- * Handle returned by [`run`]{@link run} to control the podman process.
- *
- * @example
- * ```ts
- * import {run, ProcessOutput} from 'podman'
- *
- * const proc = run(
- *     {image: 'alpine:latest', command: 'echo', commandArgs: ['hello']},
- *     {stdout: ProcessOutput.Tee},
- * )
- * await proc.waitThrow()
- * ```
- */
-export type PodmanRunHandle = {
-    /**
-     * Sends SIGKILL to the podman process.
-     *
-     * @returns True if the signal was sent, false otherwise.
-     *
-     * @example
-     * ```ts
-     * import {run} from 'podman'
-     *
-     * const proc = await run({image: 'alpine:latest', command: 'sleep', commandArgs: ['60']})
-     * proc.kill()
-     * ```
-     */
-    kill: () => boolean
-    /**
-     * Sends SIGTERM to the podman process.
-     *
-     * @returns True if the signal was sent, false otherwise.
-     *
-     * @example
-     * ```ts
-     * import {run} from 'podman'
-     *
-     * const proc = await run({image: 'alpine:latest', command: 'sleep', commandArgs: ['60']})
-     * proc.term()
-     * ```
-     */
-    term: () => boolean
-    /**
-     * Waits for the podman process to exit.
-     *
-     * @returns Resolves with the exit code of the podman process.
-     *
-     * @example
-     * ```ts
-     * import {run} from 'podman'
-     *
-     * const proc = await run({image: 'alpine:latest', command: 'true'})
-     * const code = await proc.wait()
-     * console.log(code)
-     * ```
-     */
-    wait: () => Promise<number>
-    /**
-     * Waits for the podman process to exit and rejects on non-zero exit codes.
-     *
-     * @returns Resolves with the exit code when it is zero.
-     *
-     * @example
-     * ```ts
-     * import {run} from 'podman'
-     *
-     * const proc = await run({image: 'alpine:latest', command: 'false'})
-     * await proc.waitThrow()
-     * ```
-     */
-    waitThrow: () => Promise<number>
-    /** Stdout stream when configured with [`ProcessOutput.Pipe`]{@link ProcessOutput.Pipe} or [`ProcessOutput.Tee`]{@link ProcessOutput.Tee}. */
-    stdout: Readable | null
-    /** Stderr stream when configured with [`ProcessOutput.Pipe`]{@link ProcessOutput.Pipe} or [`ProcessOutput.Tee`]{@link ProcessOutput.Tee}. */
-    stderr: Readable | null
-}
 export type ProcessOutputConfig = {
     stdio: 'pipe' | 'ignore' | 'inherit'
     tee: boolean

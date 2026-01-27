@@ -1,6 +1,6 @@
 import {ArgBuilder} from '../lib/arg-builder.ts'
-import {spawn} from 'node:child_process'
-import {type PodmanRunHandle, type ProcessOptions, resolveProcessOutput} from '../lib/spawn.ts'
+import {type ProcessOptions, ProcessOutput} from '../lib/spawn.ts'
+import {Process, StreamIn, StreamOut} from '../lib/process.ts'
 
 type PodmanRunOptions = {
     /** Image to run. */
@@ -300,14 +300,14 @@ type PodmanRunOptions = {
  *
  * @param options Run options for podman run.
  * @param processOptions Output handling for the spawned podman process.
- * @returns Handle for controlling the running podman process.
+ * @returns Spawned [`Process`]{@link Process} for controlling the running podman process.
  *
  * @example
  * ```ts
  * import {run} from 'podman'
  *
  * const proc = run({image: 'alpine:latest', command: 'echo', commandArgs: ['hello from podman']})
- * await proc.waitThrow()
+ * await proc.waitOrThrow()
  * ```
  *
  * @example
@@ -319,13 +319,13 @@ type PodmanRunOptions = {
  *     {stdout: ProcessOutput.Tee, stderr: ProcessOutput.Pipe},
  * )
  * const code = await proc.wait()
- * console.log(code, proc.stderr)
+ * console.log('exit code:', code)
  * ```
  */
 export function run(
     options: PodmanRunOptions,
     processOptions: ProcessOptions = {},
-): PodmanRunHandle {
+): Process {
     const args = new ArgBuilder('run')
 
     args.addValues('--add-host', options.addHost)
@@ -485,45 +485,23 @@ export function run(
         }
     }
 
-    const stdoutConfig = resolveProcessOutput(processOptions.stdout)
-    const stderrConfig = resolveProcessOutput(processOptions.stderr)
-    const child = spawn('podman', args.toArgs(), {
-        stdio: ['inherit', stdoutConfig.stdio, stderrConfig.stdio],
+    return Process.spawn(['podman', ...args.toArgs()], {
+        stdin: StreamIn.INHERIT,
+        stdout: resolveRunStreamOut(processOptions.stdout),
+        stderr: resolveRunStreamOut(processOptions.stderr),
     })
+}
 
-    const stdout = child.stdout ?? null
-    const stderr = child.stderr ?? null
-
-    if(stdout && stdoutConfig.tee) {
-        stdout.on('data', (chunk) => {
-            process.stdout.write(chunk)
-        })
-    }
-    if(stderr && stderrConfig.tee) {
-        stderr.on('data', (chunk) => {
-            process.stderr.write(chunk)
-        })
-    }
-
-    const exitPromise = new Promise<number>((resolve, reject) => {
-        child.on('error', reject)
-        child.on('close', (code) => {
-            resolve(code ?? 1)
-        })
-    })
-
-    return {
-        kill: () => child.kill('SIGKILL'),
-        term: () => child.kill('SIGTERM'),
-        wait: () => exitPromise,
-        waitThrow: async () => {
-            const code = await exitPromise
-            if(code !== 0) {
-                throw new Error(`podman run exited with code ${code}`)
-            }
-            return code
-        },
-        stdout,
-        stderr,
+function resolveRunStreamOut(mode: ProcessOutput | undefined): StreamOut {
+    switch(mode) {
+        case ProcessOutput.Pipe:
+            return StreamOut.PIPE
+        case ProcessOutput.Ignore:
+            return StreamOut.DISCARD
+        case ProcessOutput.Tee:
+            return StreamOut.TEE
+        case ProcessOutput.Inherit:
+        default:
+            return StreamOut.INHERIT
     }
 }
