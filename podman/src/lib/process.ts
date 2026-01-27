@@ -288,7 +288,7 @@ export class Process extends (EventEmitter as new () => TypedEventEmitter<Events
  */
 export const enum StreamIn {
     /**
-     * Provide empty input (child sees EOF immediately).
+     * Attach `/dev/null` to the child's stdin (EOF immediately).
      * Writes to stdin will be silently discarded.
      */
     EMPTY,
@@ -334,7 +334,7 @@ export const enum StreamOut {
 function resolveStreamIn(mode: StreamIn | undefined): StreamInConfig {
     switch(mode ?? StreamIn.INHERIT) {
         case StreamIn.EMPTY:
-            return {stdio: Readable.from([]), closeAfterSpawn: false}
+            return {stdio: 'ignore', closeAfterSpawn: false}
         case StreamIn.CLOSE:
             return {stdio: 'pipe', closeAfterSpawn: true}
         case StreamIn.INHERIT:

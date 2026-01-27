@@ -60,6 +60,50 @@ describe('Process', () => {
         expect(output).toBe('hello')
     })
 
+    test('StreamIn.CLOSE sends EOF to the child process', async () => {
+        const proc = Process.spawn([SHELL, '-c', 'if read -r line; then echo "read:$line"; else echo "eof"; fi'], {
+            stdin: StreamIn.CLOSE,
+            stdout: StreamOut.PIPE,
+        })
+
+        const output = await readStream(proc.stdout)
+        const code = await proc.wait()
+
+        expect(code).toBe(0)
+        expect(output.trim()).toBe('eof')
+    })
+
+    test('StreamIn.EMPTY attaches /dev/null to stdin', async () => {
+        const proc = Process.spawn([SHELL, '-c', 'if read -r line; then echo "read:$line"; else echo "eof"; fi'], {
+            stdin: StreamIn.EMPTY,
+            stdout: StreamOut.PIPE,
+        })
+
+        let sawError = false
+        proc.stdin.on('error', () => {
+            sawError = true
+        })
+
+        proc.stdin.write('discarded')
+        proc.stdin.end()
+
+        const output = await readStream(proc.stdout)
+        const code = await proc.wait()
+        expect(code).toBe(0)
+        expect(sawError).toBe(false)
+        expect(output.trim()).toBe('eof')
+    })
+
+    test('StreamIn.CLOSE ends stdin immediately', async () => {
+        const proc = Process.spawn([SHELL, '-c', 'cat >/dev/null'], {
+            stdin: StreamIn.CLOSE,
+        })
+
+        await new Promise((resolve) => setImmediate(resolve))
+        expect(proc.stdin.writableEnded).toBe(true)
+        await proc.wait()
+    })
+
     test('env replaces process.env', async () => {
         const previous = process.env.PROC_TEST_PARENT
         process.env.PROC_TEST_PARENT = 'present'
