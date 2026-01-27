@@ -50,7 +50,6 @@ const DEV_NULL = new Writable({
 
 type StreamInConfig = {
     stdio: 'pipe' | 'ignore' | 'inherit' | Readable
-    closeAfterSpawn: boolean
 }
 
 type StreamOutConfig = {
@@ -135,12 +134,6 @@ export class Process extends (EventEmitter as new () => TypedEventEmitter<Events
         })
 
         const proc = new Process(child)
-
-        if(stdinConfig.closeAfterSpawn) {
-            if(child.stdin) {
-                child.stdin.end()
-            }
-        }
 
         if(stdoutConfig.closeAfterSpawn) {
             child.stdout?.destroy()
@@ -329,11 +322,11 @@ export const enum StreamOut {
 function resolveStreamIn(mode: StreamIn | undefined): StreamInConfig {
     switch(mode ?? StreamIn.INHERIT) {
         case StreamIn.EMPTY:
-            return {stdio: 'ignore', closeAfterSpawn: false}
+            return {stdio: 'ignore'}
         case StreamIn.INHERIT:
-            return {stdio: 'inherit', closeAfterSpawn: false}
+            return {stdio: 'inherit'}
         case StreamIn.PIPE:
-            return {stdio: 'pipe', closeAfterSpawn: false}
+            return {stdio: 'pipe'}
     }
 }
 

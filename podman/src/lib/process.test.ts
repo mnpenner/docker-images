@@ -165,4 +165,38 @@ describe('Process', () => {
         expect(code).toBe(0)
         expect(sawData).toBe(false)
     })
+
+    test('StreamOut.CLOSE closes the parent read end for stdout', async () => {
+        const proc = Process.spawn([SHELL, '-c', 'printf "x"'], {
+            stdout: StreamOut.CLOSE,
+        })
+
+        let sawData = false
+        proc.on('data', () => {
+            sawData = true
+        })
+
+        await new Promise((resolve) => setImmediate(resolve))
+        expect(proc.stdout.destroyed).toBe(true)
+
+        await proc.wait(1000)
+        expect(sawData).toBe(false)
+    })
+
+    test('StreamOut.CLOSE closes the parent read end for stderr', async () => {
+        const proc = Process.spawn([SHELL, '-c', 'printf "x" 1>&2'], {
+            stderr: StreamOut.CLOSE,
+        })
+
+        let sawData = false
+        proc.on('data', () => {
+            sawData = true
+        })
+
+        await new Promise((resolve) => setImmediate(resolve))
+        expect(proc.stderr.destroyed).toBe(true)
+
+        await proc.wait(1000)
+        expect(sawData).toBe(false)
+    })
 })
