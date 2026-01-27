@@ -24,7 +24,6 @@ describe('Process', () => {
         const proc = Process.spawn([SHELL, '-c', 'echo out; echo err 1>&2'], {
             stdout: StreamOut.PIPE,
             stderr: StreamOut.PIPE,
-            stdin: StreamIn.CLOSE,
         })
 
         let stdout = ''
@@ -70,7 +69,6 @@ describe('Process', () => {
                 '-c',
                 'printf "%s|%s" "$FOO" "$PROC_TEST_PARENT"',
             ], {
-                stdin: StreamIn.CLOSE,
                 stdout: StreamOut.PIPE,
                 env: {FOO: 'bar'},
             })
@@ -90,26 +88,20 @@ describe('Process', () => {
     })
 
     test('waitOrThrow resolves with void on success', async () => {
-        const proc = Process.spawn([SHELL, '-c', 'exit 0'], {
-            stdin: StreamIn.CLOSE,
-        })
+        const proc = Process.spawn([SHELL, '-c', 'exit 0'])
 
         const result = await proc.waitOrThrow()
         expect(result).toBeUndefined()
     })
 
     test('waitOrThrow rejects on non-zero exit codes', async () => {
-        const proc = Process.spawn([SHELL, '-c', 'exit 3'], {
-            stdin: StreamIn.CLOSE,
-        })
+        const proc = Process.spawn([SHELL, '-c', 'exit 3'])
 
         expect(proc.waitOrThrow()).rejects.toThrow('process exited with code 3')
     })
 
     test('wait timeout kills the process', async () => {
-        const proc = Process.spawn([SHELL, '-c', 'sleep 5'], {
-            stdin: StreamIn.CLOSE,
-        })
+        const proc = Process.spawn([SHELL, '-c', 'sleep 5'])
 
         const code = await proc.wait(50)
         expect(code).not.toBe(0)
@@ -117,7 +109,6 @@ describe('Process', () => {
 
     test('StreamOut.DISCARD produces no data', async () => {
         const proc = Process.spawn([SHELL, '-c', 'echo discard'], {
-            stdin: StreamIn.CLOSE,
             stdout: StreamOut.DISCARD,
         })
 
