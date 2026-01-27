@@ -1,6 +1,5 @@
 import {ArgBuilder} from '../lib/arg-builder.ts'
-import {type ProcessOptions, ProcessOutput} from '../lib/spawn.ts'
-import {Process, StreamIn, StreamOut} from '../lib/process.ts'
+import {Process, type ProcessSpawnOptions} from '../lib/process.ts'
 
 type PodmanRunOptions = {
     /** Image to run. */
@@ -299,7 +298,7 @@ type PodmanRunOptions = {
  * Runs a command in a new container.
  *
  * @param options Run options for podman run.
- * @param processOptions Output handling for the spawned podman process.
+ * @param processOptions Process configuration for stdio, environment, and identity.
  * @returns Spawned [`Process`]{@link Process} for controlling the running podman process.
  *
  * @example
@@ -312,11 +311,11 @@ type PodmanRunOptions = {
  *
  * @example
  * ```ts
- * import {run, ProcessOutput} from 'podman'
+ * import {run, StreamOut} from 'podman'
  *
  * const proc = run(
  *     {image: 'alpine:latest', command: 'sh', commandArgs: ['-c', 'echo hello; echo err 1>&2']},
- *     {stdout: ProcessOutput.Tee, stderr: ProcessOutput.Pipe},
+ *     {stdout: StreamOut.TEE, stderr: StreamOut.PIPE},
  * )
  * const code = await proc.wait()
  * console.log('exit code:', code)
@@ -324,7 +323,7 @@ type PodmanRunOptions = {
  */
 export function run(
     options: PodmanRunOptions,
-    processOptions: ProcessOptions = {},
+    processOptions: ProcessSpawnOptions = {},
 ): Process {
     const args = new ArgBuilder('run')
 
@@ -485,23 +484,5 @@ export function run(
         }
     }
 
-    return Process.spawn(['podman', ...args.toArgs()], {
-        stdin: StreamIn.INHERIT,
-        stdout: resolveRunStreamOut(processOptions.stdout),
-        stderr: resolveRunStreamOut(processOptions.stderr),
-    })
-}
-
-function resolveRunStreamOut(mode: ProcessOutput | undefined): StreamOut {
-    switch(mode) {
-        case ProcessOutput.Pipe:
-            return StreamOut.PIPE
-        case ProcessOutput.Ignore:
-            return StreamOut.DISCARD
-        case ProcessOutput.Tee:
-            return StreamOut.TEE
-        case ProcessOutput.Inherit:
-        default:
-            return StreamOut.INHERIT
-    }
+    return Process.spawn(['podman', ...args.toArgs()], processOptions)
 }
