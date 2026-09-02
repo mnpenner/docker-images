@@ -1,7 +1,7 @@
 # NginX
 
-- nginx 1.29.4 (mainline) & 1.28.1 (stable)
-- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.38
+- nginx 1.31.4 (mainline) & 1.30.4 (stable)
+- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.40
 - [ngx_brotli](https://github.com/google/ngx_brotli)
 - [nginx-mod-http-zstd](https://github.com/tokers/zstd-nginx-module)
 

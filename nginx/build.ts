@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bun -i
 import {parseArgs, type ParseArgsConfig} from "node:util"
-import * as podman from '../podman'
+import {$} from "bun"
 
 const PARSE_CONFIG = {
     args: process.argv,
@@ -10,10 +10,13 @@ const PARSE_CONFIG = {
 } satisfies ParseArgsConfig
 
 async function main(values: Values, positionals: Positionals): Promise<number | void> {
-    await podman.startMachine()
+    const dockerUp = await $`docker info`.nothrow().quiet()
+    if(dockerUp.exitCode !== 0) {
+        throw new Error('Docker is not running. Start Docker Desktop and try again.')
+    }
 
-    const mainlineVersion = '1.29.4'
-    const stableVersion = '1.28.1'
+    const mainlineVersion = '1.31.4'
+    const stableVersion = '1.30.4'
     const image = 'mpen/nginx'
     const testPort = 3001
 
@@ -36,36 +39,27 @@ async function main(values: Values, positionals: Positionals): Promise<number | 
         for(const tag of build.tags) {
             allTags.add(tag)
         }
-        build.imageId = await podman.build({
-            tag: build.tags,
-            buildArg: `NGINX_VERSION=${build.version}`,
-            context: __dirname,
-        })
+        const tagFlags = build.tags.flatMap(tag => ['-t', tag])
+        await $`docker build ${tagFlags} --build-arg NGINX_VERSION=${build.version} ${__dirname}`
+        build.imageId = (await $`docker inspect --format {{.Id}} ${image}:${build.version}`.text()).trim().replace(/^sha256:/, '')
 
         console.log(`\nBuilt image ${build.imageId.slice(0,12)} w/ tags ${build.tags.map(t => `"${t}"`).join(", ")}`)
 
         console.log(`Running on port ${testPort} to verify image...`)
-        const handle = podman.run({
-            rm: true,
-            image: build.imageId,
-            interactive: true,
-            tty: true,
-            publish: `${testPort}:80`,
-        })
+        const container = (await $`docker run --rm -d -p ${testPort}:80 ${image}:${build.version}`.text()).trim()
 
         try {
             await assertNginxHealthy(testPort)
             console.log('Nginx is healthy!')
         } finally {
-            handle.term()
-            await handle.wait()
+            await $`docker stop ${container}`.nothrow().quiet()
         }
 
         console.log()
     }
 
     for(const tag of allTags.values()) {
-        await podman.push({image: tag})
+        await $`docker push ${tag}`
         console.log(`\nPushed image ${tag}\n`)
     }
 }
