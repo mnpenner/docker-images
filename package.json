@@ -1,0 +1,9 @@
+{
+  "name": "docker-images",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "typescript": "^5.8.3"
+  }
+}
