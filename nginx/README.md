@@ -1,22 +1,22 @@
 # NginX
 
-- nginx 1.31.4 (mainline) & 1.30.4 (stable)
-- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.40
-- [ngx_brotli](https://github.com/google/ngx_brotli)
+- nginx 1.31.8 (mainline) & 1.30.6 (stable)
+- [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.41
+- [ngx_brotli](https://github.com/google/ngx_brotli) with Brotli 1.2.1 (fixes [CVE-2026-111497](https://github.com/google/brotli/releases/tag/v1.2.1))
 - [nginx-mod-http-zstd](https://github.com/tokers/zstd-nginx-module)
 
 ## Compare defaults
 
 ```shell script
-podman run --rm nginx cat /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf /etc/nginx/mime.types
-podman run --rm bitnami/nginx cat /opt/bitnami/nginx/conf/nginx.conf /opt/bitnami/nginx/conf/mime.types
-podman run --rm mpen/nginx cat /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf /etc/nginx/mime.types
+docker run --rm nginx cat /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf /etc/nginx/mime.types
+docker run --rm bitnami/nginx cat /opt/bitnami/nginx/conf/nginx.conf /opt/bitnami/nginx/conf/mime.types
+docker run --rm mpen/nginx cat /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf /etc/nginx/mime.types
 
-podman run --rm nginx nginx -V
-podman run --rm bitnami/nginx nginx -V
-podman run --rm mpen/nginx nginx -V
+docker run --rm nginx nginx -V
+docker run --rm bitnami/nginx nginx -V
+docker run --rm mpen/nginx nginx -V
 
-diff -y -W "$(tput cols)" <(podman run --rm bitnami/nginx cat /opt/bitnami/nginx/conf/mime.types | sort) <(podman run --rm mpen/nginx cat /etc/nginx/mime.types | sort)
+diff -y -W "$(tput cols)" <(docker run --rm bitnami/nginx cat /opt/bitnami/nginx/conf/mime.types | sort) <(docker run --rm mpen/nginx cat /etc/nginx/mime.types | sort)
 ```
 
 ## Latest version
@@ -28,16 +28,16 @@ hxcopy http://nginx.org/download/ -o . | hxnormalize -x | hxselect -s '\n' -c 'a
 ## Refresh mime.types
 
 ```shell
-id=$(podman create nginx)
-podman cp $id:/etc/nginx/mime.types mime.types.orig
-podman rm -v $id
+id=$(docker create nginx)
+docker cp $id:/etc/nginx/mime.types mime.types.orig
+docker rm -v $id
 ```
 
 or
 
 ```sh
-podman run --rm --entrypoint cat nginx /etc/nginx/mime.types
-podman run --rm --entrypoint cat bitnami/nginx /opt/bitnami/nginx/conf/mime.types
+docker run --rm --entrypoint cat nginx /etc/nginx/mime.types
+docker run --rm --entrypoint cat bitnami/nginx /opt/bitnami/nginx/conf/mime.types
 ```
 
 ## Not included
@@ -50,17 +50,17 @@ podman run --rm --entrypoint cat bitnami/nginx /opt/bitnami/nginx/conf/mime.type
 ## Run in foreground (with logs)
 
 ```sh
-podman run --rm -it -p 8080:80 mpen/nginx
+docker run --rm -it -p 8080:80 mpen/nginx
 ```
 
 ## Run in background (detached)
 
 ```sh
-podman run --rm -d -p 8080:80 --name nginx mpen/nginx
+docker run --rm -d -p 8080:80 --name nginx mpen/nginx
 ```
 
 Stop it with
 
 ```sh
-podman kill nginx
+docker kill nginx
 ```

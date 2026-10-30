@@ -1,6 +1,7 @@
 FROM debian:bookworm-slim as build
-ARG NGINX_VERSION=1.31.4
-ARG HEADERS_MORE_VERSION=0.40
+ARG NGINX_VERSION=1.31.8
+ARG HEADERS_MORE_VERSION=0.41
+ARG BROTLI_VERSION=1.2.1
 ARG ZSTD_MODULE_REF=master
 
 RUN apt-get update \
@@ -24,6 +25,9 @@ RUN git clone --depth 1 --branch "v${HEADERS_MORE_VERSION}" \
     https://github.com/openresty/headers-more-nginx-module.git
 RUN git clone --recurse-submodules --shallow-submodules --depth 1 \
     https://github.com/google/ngx_brotli
+# Override ngx_brotli's bundled version with the CVE-2026-111497 fix.
+RUN git -C /build/ngx_brotli/deps/brotli fetch --depth 1 origin "refs/tags/v${BROTLI_VERSION}" \
+    && git -C /build/ngx_brotli/deps/brotli checkout --detach FETCH_HEAD
 RUN git clone --depth 1 --branch "${ZSTD_MODULE_REF}" \
     https://github.com/tokers/zstd-nginx-module.git
 

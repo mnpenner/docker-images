@@ -15,8 +15,8 @@ async function main(values: Values, positionals: Positionals): Promise<number | 
         throw new Error('Docker is not running. Start Docker Desktop and try again.')
     }
 
-    const mainlineVersion = '1.31.4'
-    const stableVersion = '1.30.4'
+    const mainlineVersion = '1.31.8'
+    const stableVersion = '1.30.6'
     const image = 'mpen/nginx'
     const testPort = 3001
 
@@ -40,7 +40,7 @@ async function main(values: Values, positionals: Positionals): Promise<number | 
             allTags.add(tag)
         }
         const tagFlags = build.tags.flatMap(tag => ['-t', tag])
-        await $`docker build ${tagFlags} --build-arg NGINX_VERSION=${build.version} ${__dirname}`
+        await $`docker build --pull --no-cache ${tagFlags} --build-arg NGINX_VERSION=${build.version} ${__dirname}`
         build.imageId = (await $`docker inspect --format {{.Id}} ${image}:${build.version}`.text()).trim().replace(/^sha256:/, '')
 
         console.log(`\nBuilt image ${build.imageId.slice(0,12)} w/ tags ${build.tags.map(t => `"${t}"`).join(", ")}`)
