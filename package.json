@@ -4,6 +4,7 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "^1.4.0",
+    "dockman": "^0.4.3",
     "typescript": "^5.8.3"
   }
 }

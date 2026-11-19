@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bun -i
 import {parseArgs, type ParseArgsConfig} from "node:util"
-import {$} from "bun"
+import {DockmanConnection} from "dockman"
 
 const PARSE_CONFIG = {
     args: process.argv,
@@ -10,56 +10,58 @@ const PARSE_CONFIG = {
 } satisfies ParseArgsConfig
 
 async function main(values: Values, positionals: Positionals): Promise<number | void> {
-    const dockerUp = await $`docker info`.nothrow().quiet()
-    if(dockerUp.exitCode !== 0) {
-        throw new Error('Docker is not running. Start Docker Desktop and try again.')
-    }
+    const connection = await DockmanConnection.create({preference: ['docker']})
 
-    const mainlineVersion = '1.31.8'
-    const stableVersion = '1.30.6'
+    const mainlineVersion = '1.31.9'
+    const stableVersion = '1.30.7'
     const image = 'mpen/nginx'
     const testPort = 3001
 
     const builds = [
         {
             version: mainlineVersion,
-            tags: [`${image}:mainline`, `${image}:latest`],
-            imageId: '',
+            aliases: ['mainline', 'latest'],
         },
         {
             version: stableVersion,
-            tags: [`${image}:stable`],
-            imageId: '',
+            aliases: ['stable'],
         },
     ]
 
-    const allTags = new Set<string>()
-    for(const build of builds) {
-        build.tags.unshift(`${image}:${build.version}`)
-        for(const tag of build.tags) {
-            allTags.add(tag)
-        }
-        const tagFlags = build.tags.flatMap(tag => ['-t', tag])
-        await $`docker build --pull --no-cache ${tagFlags} --build-arg NGINX_VERSION=${build.version} ${__dirname}`
-        build.imageId = (await $`docker inspect --format {{.Id}} ${image}:${build.version}`.text()).trim().replace(/^sha256:/, '')
+    const allTags: string[] = []
+    for(const {version, aliases} of builds) {
+        const versionTag = `${image}:${version}`
+        const tags = [versionTag, ...aliases.map(alias => `${image}:${alias}`)]
+        const imageId = await connection.build({
+            context: __dirname,
+            tags,
+            buildArgs: {NGINX_VERSION: version},
+            noCache: true,
+            pull: true,
+        })
+        allTags.push(...tags)
 
-        console.log(`\nBuilt image ${build.imageId.slice(0,12)} w/ tags ${build.tags.map(t => `"${t}"`).join(", ")}`)
+        console.log(`\nBuilt image ${imageId.replace(/^sha256:/, '').slice(0,12)} w/ tags ${tags.map(t => `"${t}"`).join(", ")}`)
 
         console.log(`Running on port ${testPort} to verify image...`)
-        const container = (await $`docker run --rm -d -p ${testPort}:80 ${image}:${build.version}`.text()).trim()
+        const container = await connection.run(versionTag, {
+            detach: true,
+            remove: true,
+            publish: [`${testPort}:80`],
+        })
 
         try {
             await assertNginxHealthy(testPort)
             console.log('Nginx is healthy!')
         } finally {
-            await $`docker stop ${container}`.nothrow().quiet()
+            await connection.stop(container).catch(() => {})
         }
 
         console.log()
     }
 
-    for(const tag of allTags.values()) {
-        await $`docker push ${tag}`
+    for(const tag of allTags) {
+        await connection.push(tag)
         console.log(`\nPushed image ${tag}\n`)
     }
 }

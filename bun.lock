@@ -6,6 +6,7 @@
       "name": "docker-images",
       "devDependencies": {
         "@types/bun": "^1.4.0",
+        "dockman": "^0.4.3",
         "typescript": "^5.8.3",
       },
     },
@@ -16,6 +17,8 @@
     "@types/node": ["@types/node@26.2.0", "", { "dependencies": { "undici-types": "~8.3.0" } }, "sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg=="],
 
     "bun-types": ["bun-types@1.4.0", "", { "dependencies": { "@types/node": "*" } }, "sha512-iIKw23BspnQQYd3prITOBxeUsxBHnwzX6YJfGMuNOZzeNcMmVqzIIVGRm1l69ogaPQmb4wB6BN8mA5bE9YuC5Q=="],
+
+    "dockman": ["dockman@0.4.3", "", {}, "sha512-WTg9bgKnS/GDwea/OmmCQFk6ZsbK3qcjkGyVx/QV8zsgB9tNHL00xbwep3LJaWT+sOB7JAkfqgsjCGfOogs2Nw=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 

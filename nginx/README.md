@@ -1,6 +1,6 @@
 # NginX
 
-- nginx 1.31.8 (mainline) & 1.30.6 (stable)
+- nginx 1.31.9 (mainline) & 1.30.7 (stable), including the [November 18, 2026 security fixes](https://nginx.org/2026.html)
 - [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module) v0.41
 - [ngx_brotli](https://github.com/google/ngx_brotli) with Brotli 1.2.1 (fixes [CVE-2026-111497](https://github.com/google/brotli/releases/tag/v1.2.1))
 - [nginx-mod-http-zstd](https://github.com/tokers/zstd-nginx-module)
