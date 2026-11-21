@@ -49,9 +49,54 @@ docker run --rm --entrypoint cat bitnami/nginx /opt/bitnami/nginx/conf/mime.type
 
 ## Run in foreground (with logs)
 
+The image starts nginx with `-g 'daemon off;'` by default, keeping nginx in
+the foreground. Docker stays attached and shows access logs from stdout and
+error logs from stderr.
+
 ```sh
 docker run --rm -it -p 8080:80 mpen/nginx
 ```
+
+## HTTPS and HTTP/3
+
+The default site listens on TCP 443 for HTTPS and UDP 443 for HTTP/3.
+Publish both ports to let clients discover HTTP/3 over HTTPS via the
+`Alt-Svc` header. Plain HTTP on port 80 remains available.
+
+```sh
+docker run --rm -p 8080:80 -p 443:443/tcp -p 443:443/udp mpen/nginx
+```
+
+The container generates a self-signed certificate for localhost on first
+startup. With an HTTP/3-capable curl, test it locally with
+`curl --http3-only --insecure https://localhost/`.
+
+For a trusted certificate, mount a directory containing `fullchain.pem`
+and `privkey.pem` at `/etc/nginx/tls`.
+
+```sh
+docker run --rm -p 443:443/tcp -p 443:443/udp -v /path/to/tls:/etc/nginx/tls:ro mpen/nginx
+```
+
+## Trusted localhost HTTPS and HTTP/3 on Windows
+
+From the repository root, run this with Windows Bun in Termulator or zsh.
+
+```sh
+bun nginx/run-local.ts
+```
+
+The launcher builds a local image and serves [https://localhost:8080](https://localhost:8080)
+on TCP and UDP loopback. It uses mkcert to generate a localhost certificate and
+opens Vivaldi, Chrome, or Edge in a separate profile that accepts only the
+generated certificate's key as an exception. In that window, show the
+**Protocol** column in DevTools **Network** to verify `h3`. Stop NGINX with
+Ctrl+C. If port 8080 is already in use, stop the previous local container first.
+
+Use `bun nginx/run-local.ts --trust` to install the mkcert development CA in the
+Windows user trust store and use your regular browser for HTTPS. Windows may
+prompt the first time. Chromium's HTTP/3 check still needs the separate
+profile opened by the default command.
 
 ## Run in background (detached)
 

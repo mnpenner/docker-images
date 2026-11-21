@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim as build
+FROM debian:bookworm-slim AS build
 ARG NGINX_VERSION=1.31.9
 ARG HEADERS_MORE_VERSION=0.41
 ARG BROTLI_VERSION=1.2.1
@@ -69,6 +69,7 @@ RUN cd nginx && ./configure \
         --with-http_stub_status_module \
         --with-http_sub_module \
         --with-http_v2_module \
+        --with-http_v3_module \
         --with-mail \
         --with-mail_ssl_module \
         --with-stream \
@@ -84,7 +85,7 @@ RUN cd nginx && ./configure \
 RUN cd nginx && make -j"$(nproc)" && make install \
     && rm -rf /etc/nginx/html /etc/nginx/*.default /etc/nginx/koi-* /etc/nginx/win-utf
 
-FROM build as runtime-prep
+FROM build AS runtime-prep
 ARG UID=101
 ARG GID=101
 
@@ -113,9 +114,13 @@ RUN mkdir -p /dist/etc /dist/usr/sbin /dist/srv /dist/var/spool /dist/var \
     && cp -a /etc/passwd /etc/group /dist/etc/
 
 FROM alpine:3
+RUN apk add --no-cache openssl
 COPY --from=runtime-prep /dist/ /
+COPY --chmod=755 start-nginx.sh /usr/local/bin/start-nginx
+# Windows checkouts can supply CRLF line endings.
+RUN sed -i 's/\r$//' /usr/local/bin/start-nginx
 
-EXPOSE 80
+EXPOSE 80/tcp 443/tcp 443/udp
 # Use SIGQUIT intead of SIGTERM to give chance for graceful shutdown
 # https://github.com/nginx/docker-nginx/issues/377
 # https://medium.com/codecademy-engineering/kubernetes-nginx-and-zero-downtime-in-production-2c910c6a5ed8
@@ -123,4 +128,4 @@ EXPOSE 80
 STOPSIGNAL SIGQUIT
 
 WORKDIR /etc/nginx
-CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
+CMD ["/usr/local/bin/start-nginx", "-g", "daemon off;"]
